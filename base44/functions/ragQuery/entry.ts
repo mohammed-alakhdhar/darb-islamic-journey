@@ -146,6 +146,6 @@ ${context}
   }
 }
 
-function waitUntilLog(base44, logData) {
-  waitUntil(base44.asServiceRole.entities.RagLog.create(logData).catch(() => {}));
+function logRag(base44, logData) {
+  base44.asServiceRole.entities.RagLog.create(logData).catch(() => {});
 }
