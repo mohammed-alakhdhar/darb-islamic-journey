@@ -8,21 +8,23 @@ import RagEval from '@/components/admin/RagEval';
 import RagLogs from '@/components/admin/RagLogs';
 import { base44 } from '@/api/base44Client';
 import { useUserProgress } from '@/lib/darb';
-
-const TABS = [
-  { key: 'overview', label: 'نظرة عامة', icon: LayoutDashboard },
-  { key: 'sources', label: 'المصادر', icon: BookOpen },
-  { key: 'chunks', label: 'المقتطفات', icon: FileText },
-  { key: 'challenges', label: 'التحديات', icon: Award },
-  { key: 'rag', label: 'تقييم RAG', icon: Sparkles },
-  { key: 'logs', label: 'السجلات', icon: ScrollText }
-];
+import { useI18n } from '@/lib/i18n';
 
 export default function Admin() {
   const { progress } = useUserProgress();
+  const { t } = useI18n();
   const [tab, setTab] = useState('overview');
   const [isAdmin, setIsAdmin] = useState(null);
   const [counts, setCounts] = useState({});
+
+  const TABS = [
+    { key: 'overview', label: t('admin.tab.overview'), icon: LayoutDashboard },
+    { key: 'sources', label: t('admin.tab.sources'), icon: BookOpen },
+    { key: 'chunks', label: t('admin.tab.chunks'), icon: FileText },
+    { key: 'challenges', label: t('admin.tab.challenges'), icon: Award },
+    { key: 'rag', label: t('admin.tab.rag'), icon: Sparkles },
+    { key: 'logs', label: t('admin.tab.logs'), icon: ScrollText }
+  ];
 
   useEffect(() => {
     base44.auth.me().then((u) => setIsAdmin(u?.role === 'admin')).catch(() => setIsAdmin(false));
@@ -49,20 +51,20 @@ export default function Admin() {
       <div className="min-h-screen gradient-sand grid place-items-center px-4">
         <div className="text-center max-w-sm">
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-muted text-muted-foreground mb-4"><Lock className="h-8 w-8" /></div>
-          <h2 className="font-display text-2xl font-bold text-foreground">مركز المعرفة للمسؤولين</h2>
-          <p className="mt-2 text-muted-foreground">هذه الصفحة مخصصة للمسؤولين المصرّح لهم فقط.</p>
+          <h2 className="font-display text-2xl font-bold text-foreground">{t('admin.accessTitle')}</h2>
+          <p className="mt-2 text-muted-foreground">{t('admin.accessDesc')}</p>
         </div>
       </div>
     );
   }
 
   const statCards = [
-    { label: 'المصادر', value: counts.sources ?? '—', icon: BookOpen, tone: 'bg-primary/10 text-primary' },
-    { label: 'المقتطفات المعرفية', value: counts.chunks ?? '—', icon: FileText, tone: 'bg-darb-gold/15 text-darb-gold' },
-    { label: 'التحديات', value: counts.challenges ?? '—', icon: Award, tone: 'bg-secondary/10 text-secondary' },
-    { label: 'محطات الهجرة', value: counts.stages ?? '—', icon: LayoutDashboard, tone: 'bg-primary/10 text-primary' },
-    { label: 'سجلات RAG', value: counts.logs ?? '—', icon: ScrollText, tone: 'bg-muted text-muted-foreground' },
-    { label: 'أسئلة بلا مصدر كافٍ', value: counts.insufficient ?? '—', icon: Sparkles, tone: 'bg-amber-100 text-amber-700' }
+    { label: t('admin.stat.sources'), value: counts.sources ?? '—', icon: BookOpen, tone: 'bg-primary/10 text-primary' },
+    { label: t('admin.stat.chunks'), value: counts.chunks ?? '—', icon: FileText, tone: 'bg-darb-gold/15 text-darb-gold' },
+    { label: t('admin.stat.challenges'), value: counts.challenges ?? '—', icon: Award, tone: 'bg-secondary/10 text-secondary' },
+    { label: t('admin.stat.stages'), value: counts.stages ?? '—', icon: LayoutDashboard, tone: 'bg-primary/10 text-primary' },
+    { label: t('admin.stat.logs'), value: counts.logs ?? '—', icon: ScrollText, tone: 'bg-muted text-muted-foreground' },
+    { label: t('admin.stat.insufficient'), value: counts.insufficient ?? '—', icon: Sparkles, tone: 'bg-amber-100 text-amber-700' }
   ];
 
   return (
@@ -72,22 +74,22 @@ export default function Admin() {
         <div className="flex items-center gap-3 mb-6">
           <div className="grid h-11 w-11 place-items-center rounded-2xl gradient-darb text-darb-cream"><Shield className="h-6 w-6" /></div>
           <div>
-            <h1 className="font-display text-2xl font-bold text-foreground">مركز المعرفة</h1>
-            <p className="text-sm text-muted-foreground">إدارة المصادر والمحتوى وتقييم نظام الاسترجاع</p>
+            <h1 className="font-display text-2xl font-bold text-foreground">{t('admin.title')}</h1>
+            <p className="text-sm text-muted-foreground">{t('admin.subtitle')}</p>
           </div>
         </div>
 
         {/* التبويبات */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {TABS.map((t) => (
+          {TABS.map((tb) => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
+              key={tb.key}
+              onClick={() => setTab(tb.key)}
               className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-                tab === t.key ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'
+                tab === tb.key ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'
               }`}
             >
-              <t.icon className="h-4 w-4" /> {t.label}
+              <tb.icon className="h-4 w-4" /> {tb.label}
             </button>
           ))}
         </div>
@@ -102,8 +104,8 @@ export default function Admin() {
               </div>
             ))}
             <div className="col-span-2 sm:col-span-3 rounded-2xl border border-darb-gold/40 bg-darb-gold/10 p-5">
-              <h3 className="font-semibold text-foreground flex items-center gap-2"><Sparkles className="h-4 w-4 text-darb-gold" /> ملاحظة</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">المحتوى غير المراجع لا يُعتمد كمصدر أساسي لرفيق الدرب. راجع درجة التوثيق لكل مصدر قبل تفعيله.</p>
+              <h3 className="font-semibold text-foreground flex items-center gap-2"><Sparkles className="h-4 w-4 text-darb-gold" /> {t('admin.noteTitle')}</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">{t('admin.noteDesc')}</p>
             </div>
           </div>
         )}

@@ -1,48 +1,52 @@
 import { useNavigate } from 'react-router-dom';
 import { Sprout, Scale, Mountain, ArrowLeft, Check } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import { useUserProgress, LEVEL_LABELS } from '@/lib/darb';
-
-const LEVELS = [
-  {
-    key: 'beginner',
-    title: 'مبتدئ',
-    icon: Sprout,
-    desc: 'شرح أطول وأبسط، أسئلة أسهل، وتلميحات أكثر.',
-    points: ['شرح مفصّل', 'أسئلة أساسية', 'تلميحات كثيرة']
-  },
-  {
-    key: 'intermediate',
-    title: 'متوسط',
-    icon: Scale,
-    desc: 'أسئلة متوسطة وسياق إضافي مناسب.',
-    points: ['شرح متوازن', 'سياق إضافي', 'أسئلة متوسطة']
-  },
-  {
-    key: 'advanced',
-    title: 'متقدم',
-    icon: Mountain,
-    desc: 'أسئلة مقارنة وتوثيق وتحليل روايات.',
-    points: ['أسئلة تحليلية', 'مقارنة الروايات', 'تحديات توثيق']
-  }
-];
+import { useUserProgress } from '@/lib/darb';
+import { useI18n } from '@/lib/i18n';
 
 export default function LevelSelect() {
   const navigate = useNavigate();
   const { progress, update, loading } = useUserProgress();
+  const { t, levelLabel, dir } = useI18n();
+
+  const LEVELS = [
+    {
+      key: 'beginner',
+      title: levelLabel('beginner'),
+      icon: Sprout,
+      desc: t('level.beginnerDesc'),
+      points: [t('landing.featKb')]
+    },
+    {
+      key: 'intermediate',
+      title: levelLabel('intermediate'),
+      icon: Scale,
+      desc: t('level.intermediateDesc'),
+      points: [t('level.intermediateDesc')]
+    },
+    {
+      key: 'advanced',
+      title: levelLabel('advanced'),
+      icon: Mountain,
+      desc: t('level.advancedDesc'),
+      points: [t('level.advancedDesc')]
+    }
+  ];
 
   const choose = async (level) => {
     await update({ knowledge_level: level });
     navigate('/journey/hijrah');
   };
 
+  const Arrow = dir === 'rtl' ? ArrowLeft : ArrowLeft;
+
   return (
     <div className="min-h-screen gradient-sand">
       <Navbar xp={progress?.xp} />
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16">
         <div className="text-center mb-10">
-          <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground">اختر مستواك المعرفي</h1>
-          <p className="mt-3 text-muted-foreground">يُكيّف رفيق الدرب الشرح والتحديات حسب مستواك. يمكنك تغييره لاحقًا.</p>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground">{t('level.title')}</h1>
+          <p className="mt-3 text-muted-foreground">{t('level.subtitle')}</p>
         </div>
 
         <div className="space-y-4">
@@ -66,18 +70,13 @@ export default function LevelSelect() {
                       <h3 className="font-display text-xl font-bold text-foreground">{lvl.title}</h3>
                       {active && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-xs font-medium">
-                          <Check className="h-3 w-3" /> الحالي
+                          <Check className="h-3 w-3" /> {t('common.current')}
                         </span>
                       )}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{lvl.desc}</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {lvl.points.map((p) => (
-                        <span key={p} className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">{p}</span>
-                      ))}
-                    </div>
                   </div>
-                  <ArrowLeft className="h-5 w-5 text-muted-foreground mt-2" />
+                  <Arrow className="h-5 w-5 text-muted-foreground mt-2" />
                 </div>
               </button>
             );

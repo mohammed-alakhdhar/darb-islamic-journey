@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { CheckCircle2, XCircle, Lightbulb, Award, RotateCcw } from 'lucide-react';
 import SourceCard from './SourceCard';
+import { useI18n } from '@/lib/i18n';
 
 export default function ChallengeView({ challenge, source, onSolved, onFail }) {
+  const { t } = useI18n();
   const [selected, setSelected] = useState(null);
   const [ordering, setOrdering] = useState([]);
   const [submitted, setSubmitted] = useState(false);
@@ -61,7 +63,8 @@ export default function ChallengeView({ challenge, source, onSolved, onFail }) {
           <Award className="h-4.5 w-4.5" />
         </div>
         <div>
-          <div className="text-xs text-muted-foreground">تحدي المحطة · {challenge.xp_reward} XP</div>
+          <div className="text-xs text-muted-foreground">{t('challenge.stageChallenge')} · {challenge.xp_reward} XP</div>
+          {/* نص السؤال يبقى كما ورد في قاعدة المعرفة (عربي) */}
           <div className="font-semibold text-foreground">{challenge.question}</div>
         </div>
       </div>
@@ -78,7 +81,7 @@ export default function ChallengeView({ challenge, source, onSolved, onFail }) {
                 key={i}
                 disabled={submitted}
                 onClick={() => setSelected(opt)}
-                className={`w-full text-right rounded-xl border px-4 py-3 text-sm transition-all flex items-center justify-between ${
+                className={`w-full text-start rounded-xl border px-4 py-3 text-sm transition-all flex items-center justify-between ${
                   showState && isCorrect ? 'border-primary bg-primary/10 text-primary font-medium'
                     : showState && isSelected && !isCorrect ? 'border-destructive bg-destructive/10 text-destructive'
                     : isSelected ? 'border-primary bg-primary/5 text-foreground'
@@ -101,7 +104,7 @@ export default function ChallengeView({ challenge, source, onSolved, onFail }) {
             <button
               key={i}
               onClick={() => setOrdering((o) => [...o, opt])}
-              className="w-full text-right rounded-xl border border-dashed border-border px-4 py-3 text-sm hover:border-primary/40 hover:bg-primary/5"
+              className="w-full text-start rounded-xl border border-dashed border-border px-4 py-3 text-sm hover:border-primary/40 hover:bg-primary/5"
             >
               {opt}
             </button>
@@ -112,7 +115,7 @@ export default function ChallengeView({ challenge, source, onSolved, onFail }) {
               <span className="flex-1 text-sm">{opt}</span>
               <button onClick={() => moveUp(i)} className="text-xs text-muted-foreground hover:text-foreground">↑</button>
               <button onClick={() => moveDown(i)} className="text-xs text-muted-foreground hover:text-foreground">↓</button>
-              <button onClick={() => setOrdering((o) => o.filter((x) => x !== opt))} className="text-xs text-destructive">إزالة</button>
+              <button onClick={() => setOrdering((o) => o.filter((x) => x !== opt))} className="text-xs text-destructive">{t('challenge.remove')}</button>
             </div>
           ))}
         </div>
@@ -123,11 +126,11 @@ export default function ChallengeView({ challenge, source, onSolved, onFail }) {
         <div className="mt-3">
           {showHint ? (
             <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
-              <Lightbulb className="inline h-4 w-4 ml-1" /> تلميح: {challenge.hint}
+              <Lightbulb className="inline h-4 w-4 ml-1" /> {t('challenge.hint', { hint: challenge.hint })}
             </div>
           ) : (
             <button onClick={() => setShowHint(true)} className="text-sm text-muted-foreground hover:text-darb-gold inline-flex items-center gap-1.5">
-              <Lightbulb className="h-4 w-4" /> اطلب تلميحًا
+              <Lightbulb className="h-4 w-4" /> {t('challenge.showHint')}
             </button>
           )}
         </div>
@@ -142,7 +145,7 @@ export default function ChallengeView({ challenge, source, onSolved, onFail }) {
               disabled={ordering.length !== (challenge.correct_order || challenge.options || []).length}
               className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-40 hover:bg-primary/90"
             >
-              تحقّق من الترتيب
+              {t('challenge.checkOrder')}
             </button>
           ) : (
             <button
@@ -150,7 +153,7 @@ export default function ChallengeView({ challenge, source, onSolved, onFail }) {
               disabled={!selected}
               className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-40 hover:bg-primary/90"
             >
-              تأكيد الإجابة
+              {t('challenge.confirm')}
             </button>
           )}
         </div>
@@ -159,7 +162,7 @@ export default function ChallengeView({ challenge, source, onSolved, onFail }) {
           <div className={`rounded-xl p-4 ${correct ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
             <div className="flex items-center gap-2 font-semibold">
               {correct ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
-              {correct ? 'إجابة صحيحة!' : 'إجابة غير صحيحة'}
+              {correct ? t('challenge.correct') : t('challenge.incorrect')}
             </div>
             {challenge.explanation && (
               <p className="mt-2 text-sm leading-relaxed text-foreground/80">{challenge.explanation}</p>
@@ -168,7 +171,7 @@ export default function ChallengeView({ challenge, source, onSolved, onFail }) {
           {source && <SourceCard source={source} />}
           {!correct && (
             <button onClick={reset} className="inline-flex items-center gap-1.5 rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted">
-              <RotateCcw className="h-4 w-4" /> حاول مجددًا
+              <RotateCcw className="h-4 w-4" /> {t('challenge.retry')}
             </button>
           )}
         </div>

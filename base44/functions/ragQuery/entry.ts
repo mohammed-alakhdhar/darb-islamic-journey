@@ -11,6 +11,19 @@ const LEVEL_GUIDE = {
   advanced: "مستوى متقدم: اشرح بإيجاز مع إشارة إلى درجة التوثيق واختلاف الروايات إن وُجد."
 };
 
+// لغة الإجابة — الاسترجاع يبقى كما هو، فقط لغة التوليد تتغيّر
+const LANG_LABEL = {
+  ar: "بالعربية",
+  en: "in clear, respectful English",
+  fr: "en français clair et respectueux"
+};
+
+const NO_MATCH_ANSWER = {
+  ar: "لا أملك في قاعدة المعرفة الحالية مصدرًا كافيًا للإجابة بدقة. يمكنك تجربة سؤال آخر مرتبط بالمحطة الحالية.",
+  en: "I don't have a sufficient source in the current knowledge base to answer accurately. You can try another question related to the current stage.",
+  fr: "Je n'ai pas de source suffisante dans la base de savoir actuelle pour répondre avec précision. Vous pouvez essayer une autre question liée à l'étape actuelle."
+};
+
 const SYSTEM_PROMPT = `أنت "رفيق الدرب"، مرشد تاريخي تعليمي إسلامي مرافق للمستخدم في رحلة معرفية تفاعلية عن السيرة والتاريخ الإسلامي.
 
 قواعد صارمة:
@@ -44,6 +57,7 @@ export default async function(req) {
     const journeySlug = body.journey_slug || 'hijrah';
     const stageOrder = body.stage_order ?? null;
     const knowledgeLevel = body.knowledge_level || 'beginner';
+    const language = ['ar', 'en', 'fr'].includes(body.language) ? body.language : 'ar';
 
     if (!question) {
       return Response.json({ error: 'السؤال مطلوب' }, { status: 400 });
@@ -59,7 +73,7 @@ export default async function(req) {
     const retrieved = retrieveChunks(pool, question, 5, 0.5);
 
     if (!retrieved.length) {
-      const noAnswer = "لا أملك في قاعدة المعرفة الحالية مصدرًا كافيًا للإجابة بدقة. يمكنك تجربة سؤال آخر مرتبط بالمحطة الحالية.";
+      const noAnswer = NO_MATCH_ANSWER[language] || NO_MATCH_ANSWER.ar;
       logRag(base44, { question, journey_slug: journeySlug, stage_order: stageOrder, retrieved_chunks: [], sources: [], answer: noAnswer, retrieval_status: 'no_match', confidence: 'none' });
       return Response.json({
         answer: noAnswer,
@@ -75,7 +89,13 @@ export default async function(req) {
     const levelLine = LEVEL_GUIDE[knowledgeLevel] || LEVEL_GUIDE.beginner;
     const stageLine = stageOrder != null ? `المستخدم حاليًا في المحطة رقم ${stageOrder} من درب ${journeySlug}. اربط إجابتك بالمحطة عندما يكون مناسبًا.` : '';
 
+    const langDirective = language === 'ar'
+      ? "أجب بالعربية فقط."
+      : `أجب ${LANG_LABEL[language]}. استثناءً من القاعدة 1: لغة الإجابة تكون ${LANG_LABEL[language]} لا العربية. ومع ذلك: احتفظ بأسماء المصادر والمراجع كما وردت حرفيًا في السياق (بالعربية الأصلية)، ولا تترجم أسماء الكتب أو أرقام الأحاديث أو النصوص المقتبسة. اشرح المعنى باللغة المطلوبة دون اختلاق اقتباسات مترجمة أو أدلة دينية غير موجودة في السياق.`;
+
     const prompt = `${SYSTEM_PROMPT}
+
+${langDirective}
 
 إرشادات المستوى: ${levelLine}
 ${stageLine}

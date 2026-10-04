@@ -1,17 +1,20 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Compass, Sparkles, Shield, Home as HomeIcon, Menu } from 'lucide-react';
 import { useState } from 'react';
+import { useI18n } from '@/lib/i18n';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navbar({ xp }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
 
   const links = [
-    { to: '/', label: 'الرئيسية', icon: HomeIcon },
-    { to: '/journey/hijrah', label: 'درب الهجرة', icon: Compass },
-    { to: '/how-it-works', label: 'كيف يعمل الذكاء', icon: Sparkles },
-    { to: '/admin', label: 'مركز المعرفة', icon: Shield }
+    { to: '/', label: t('nav.home'), icon: HomeIcon },
+    { to: '/journey/hijrah', label: t('nav.hijrah'), icon: Compass },
+    { to: '/how-it-works', label: t('nav.how'), icon: Sparkles },
+    { to: '/admin', label: t('nav.admin'), icon: Shield }
   ];
 
   return (
@@ -22,7 +25,7 @@ export default function Navbar({ xp }) {
             <span className="grid h-9 w-9 place-items-center rounded-xl gradient-darb text-darb-cream font-display text-lg font-bold shadow-soft">د</span>
             <div className="leading-tight">
               <div className="font-display text-lg font-bold text-foreground">دَرْب</div>
-              <div className="text-[10px] text-muted-foreground tracking-wide">لا تقرأ التاريخ… اكتشفه</div>
+              <div className="text-[10px] text-muted-foreground tracking-wide">{t('brand.tagline')}</div>
             </div>
           </Link>
 
@@ -52,10 +55,13 @@ export default function Navbar({ xp }) {
                 <span className="text-xs text-muted-foreground">XP</span>
               </div>
             )}
+            <div className="hidden md:block">
+              <LanguageSwitcher />
+            </div>
             <button
               className="md:hidden grid h-9 w-9 place-items-center rounded-lg border border-border text-foreground"
               onClick={() => setOpen((o) => !o)}
-              aria-label="القائمة"
+              aria-label={t('nav.menu')}
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -75,6 +81,9 @@ export default function Navbar({ xp }) {
                 {l.label}
               </Link>
             ))}
+            <div className="pt-2 pb-1">
+              <LanguageSwitcher compact />
+            </div>
           </nav>
         )}
       </div>

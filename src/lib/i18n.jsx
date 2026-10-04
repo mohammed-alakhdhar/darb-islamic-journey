@@ -1,0 +1,739 @@
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+
+// اللغات المدعومة — العربية هي الأساس
+export const LANGUAGES = [
+  { code: 'ar', label: 'العربية', dir: 'rtl' },
+  { code: 'en', label: 'English', dir: 'ltr' },
+  { code: 'fr', label: 'Français', dir: 'ltr' }
+];
+
+const LANG_KEY = 'darb_lang_v1';
+const DEFAULT_LANG = 'ar';
+
+function readLang() {
+  try {
+    const stored = localStorage.getItem(LANG_KEY);
+    if (stored && LANGUAGES.some((l) => l.code === stored)) return stored;
+  } catch { /* ignore */ }
+  return DEFAULT_LANG;
+}
+
+// ===== الترجمات =====
+const T = {
+  ar: {
+    'nav.home': 'الرئيسية',
+    'nav.hijrah': 'درب الهجرة',
+    'nav.how': 'كيف يعمل الذكاء',
+    'nav.admin': 'مركز المعرفة',
+    'nav.menu': 'القائمة',
+    'brand.tagline': 'لا تقرأ التاريخ… اكتشفه',
+    'lang.label': 'اللغة',
+    'common.xp': 'نقاط الخبرة',
+    'common.loading': 'جارٍ التحميل…',
+    'common.available': 'متاح',
+    'common.comingSoon': 'قريبًا',
+    'common.locked': 'مقفلة',
+    'common.completed': 'مكتملة',
+    'common.current': 'الحالي',
+    'common.start': 'ابدأ',
+    'common.back': 'العودة',
+    'common.close': 'إغلاق',
+    'common.send': 'إرسال',
+    'common.save': 'حفظ',
+    'common.reference': 'المرجع',
+    'landing.heroBadge': 'رحلات معرفية تفاعلية',
+    'landing.heroSubtitle': '«لا تقرأ التاريخ… اكتشفه»',
+    'landing.heroDesc': 'منصة تفاعلية تحوّل المعرفة التاريخية إلى رحلة تستكشفها بنفسك — بمرشد ذكي يجيب من قاعدة معرفة موثقة، ويذكر المصدر.',
+    'landing.startJourney': 'ابدأ رحلتك',
+    'landing.exploreJourneys': 'استكشف الدروب',
+    'landing.featAi': 'مرشد ذكي بالذكاء الاصطناعي',
+    'landing.featSource': 'إجابات مبنية على المصدر',
+    'landing.featMap': 'خريطة رحلة تفاعلية',
+    'landing.featKb': 'قاعدة معرفة موثقة',
+    'landing.howTitle': 'كيف يعمل دَرْب؟',
+    'landing.howSubtitle': 'سبع خطوات في رحلتك المعرفية',
+    'landing.journeysTitle': 'اختر دربك',
+    'landing.journeysSubtitle': 'كل درب رحلة معرفية تفاعلية بمحطات وأحداث وتحديات',
+    'landing.ctaTitle': 'ابدأ رحلتك في درب الهجرة',
+    'landing.ctaDesc': 'عشر محطات من مكة إلى المدينة، بمرشد ذكي ومصادر موثقة.',
+    'landing.ctaButton': 'ابدأ الآن',
+    'landing.endlessTitle': 'رحلة لا تنتهي',
+    'landing.endlessDesc': 'دروب جديدة تُضاف باستمرار، وكل درب رحلة كاملة.',
+    'landing.footerTagline': 'منصة معرفية تفاعلية لاكتشاف السيرة والتاريخ الإسلامي',
+    'landing.footerNote': 'جميع المحتوى المعرفي مرتبط بمصادره. لا تُقدّم رواية غير موثقة كحقيقة قاطعة.',
+    'level.title': 'اختر مستواك المعرفي',
+    'level.subtitle': 'يُكيّف رفيق الدرب الشرح والتحديات حسب مستواك. يمكنك تغييره لاحقًا.',
+    'level.beginner': 'مبتدئ',
+    'level.intermediate': 'متوسط',
+    'level.advanced': 'متقدم',
+    'level.beginnerDesc': 'شرح أطول وأبسط، أسئلة أسهل، وتلميحات أكثر.',
+    'level.intermediateDesc': 'أسئلة متوسطة وسياق إضافي مناسب.',
+    'level.advancedDesc': 'أسئلة مقارنة وتوثيق وتحليل روايات.',
+    'level.choose': 'اختر',
+    'map.badge': 'درب متاح',
+    'map.startFirst': 'ابدأ من المحطة الأولى',
+    'map.current': 'المحطة الحالية',
+    'map.completed': 'مكتملة',
+    'map.locked': 'مقفلة',
+    'map.explore': 'ابدأ الاستكشاف',
+    'map.title': 'درب الهجرة',
+    'map.subtitle': 'لا تقرأ الهجرة… اكتشفها',
+    'map.desc': 'رحلة تفاعلية لاكتشاف أحداث الهجرة النبوية من مكة إلى المدينة عبر عشر محطات.',
+    'stage.lockedTitle': 'المحطة مقفلة',
+    'stage.lockedDesc': 'أكمل المحطة السابقة لفتح هذه المحطة.',
+    'stage.backToMap': 'العودة للخريطة',
+    'stage.mapLink': 'الخريطة',
+    'stage.stageLabel': 'المحطة',
+    'stage.historicalContext': 'السياق التاريخي',
+    'stage.eventsTitle': 'أحداث المحطة',
+    'stage.challengeTitle': 'تحدي المحطة',
+    'stage.wellDone': 'أحسنت! أكملت المحطة',
+    'stage.xpEarned': 'كسبت {xp} نقطة خبرة',
+    'stage.newBadge': 'شارة جديدة: {badge}',
+    'stage.nextStage': 'المحطة التالية',
+    'stage.viewMap': 'عرض الخريطة',
+    'stage.noChallenges': 'لا توجد تحديات في هذه المحطة بعد. يمكنك إكمالها للمتابعة.',
+    'stage.completeStage': 'إكمال المحطة',
+    'stage.guideButton': 'رفيق الدرب',
+    'stage.guideSubtitle': 'مرشدك في الرحلة',
+    'challenge.stageChallenge': 'تحدي المحطة',
+    'challenge.confirm': 'تأكيد الإجابة',
+    'challenge.checkOrder': 'تحقّق من الترتيب',
+    'challenge.correct': 'إجابة صحيحة!',
+    'challenge.incorrect': 'إجابة غير صحيحة',
+    'challenge.hint': 'تلميح: {hint}',
+    'challenge.showHint': 'اطلب تلميحًا',
+    'challenge.remove': 'إزالة',
+    'challenge.retry': 'حاول مجددًا',
+    'guide.title': 'رفيق الدرب',
+    'guide.subtitle': 'مرشدك في الرحلة',
+    'guide.askPrompt': 'اسأل رفيق الدرب',
+    'guide.askDesc': 'يجيب من قاعدة المعرفة الموثقة، ويذكر المصدر.',
+    'guide.sourcesUsed': 'المصادر المستخدمة',
+    'guide.noMatchNote': 'لم يُعثر على مصدر كافٍ في قاعدة المعرفة.',
+    'guide.inputPlaceholder': 'اكتب سؤالك…',
+    'guide.errorRetry': 'تعذّر الاتصال برفيق الدرب. حاول مرة أخرى.',
+    'guide.noAnswer': 'لا أملك في قاعدة المعرفة الحالية مصدرًا كافيًا للإجابة بدقة. يمكنك تجربة سؤال آخر مرتبط بالمحطة الحالية.',
+    'source.unnamed': 'مصدر غير مسمّى',
+    'source.viewSource': 'عرض المصدر',
+    'xpbar.badges': 'شارة',
+    'xpbar.progress': 'تقدّم الرحلة',
+    'how.title': 'كيف يعمل الذكاء الاصطناعي؟',
+    'how.subtitle': 'شفافية تقنية: كيف يجيب رفيق الدرب من قاعدة المعرفة الموثقة.',
+    'how.retrievalTitle': 'ملاحظة حول الاسترجاع',
+    'how.rulesTitle': 'قواعد الموثوقية',
+    'admin.title': 'مركز المعرفة',
+    'admin.subtitle': 'إدارة المصادر والمحتوى وتقييم نظام الاسترجاع',
+    'admin.accessTitle': 'مركز المعرفة للمسؤولين',
+    'admin.accessDesc': 'هذه الصفحة مخصصة للمسؤولين المصرّح لهم فقط.',
+    'admin.noteTitle': 'ملاحظة',
+    'admin.noteDesc': 'المحتوى غير المراجع لا يُعتمد كمصدر أساسي لرفيق الدرب. راجع درجة التوثيق لكل مصدر قبل تفعيله.',
+    'admin.tab.overview': 'نظرة عامة',
+    'admin.tab.sources': 'المصادر',
+    'admin.tab.chunks': 'المقتطفات',
+    'admin.tab.challenges': 'التحديات',
+    'admin.tab.rag': 'تقييم RAG',
+    'admin.tab.logs': 'السجلات',
+    'admin.stat.sources': 'المصادر',
+    'admin.stat.chunks': 'المقتطفات المعرفية',
+    'admin.stat.challenges': 'التحديات',
+    'admin.stat.stages': 'محطات الهجرة',
+    'admin.stat.logs': 'سجلات RAG',
+    'admin.stat.insufficient': 'أسئلة بلا مصدر كافٍ',
+    'admin.sources.addTitle': 'إضافة مصدر',
+    'admin.sources.namePh': 'اسم المصدر',
+    'admin.sources.refPh': 'المرجع (رقم/صفحة)',
+    'admin.sources.urlPh': 'الرابط (إن وُجد)',
+    'admin.sources.publisherPh': 'الناشر',
+    'admin.sources.descPh': 'وصف مختصر',
+    'admin.sources.save': 'حفظ المصدر',
+    'admin.sources.empty': 'لا توجد مصادر بعد.',
+    'admin.sources.disabled': 'معطّل',
+    'admin.sources.toggleTitle': 'تفعيل/تعطيل',
+    'admin.chunks.addTitle': 'إضافة مقتطف معرفي',
+    'admin.chunks.pickSource': 'اختر مصدرًا…',
+    'admin.chunks.docTitlePh': 'عنوان الوثيقة',
+    'admin.chunks.topicPh': 'الموضوع',
+    'admin.chunks.stagePh': 'رقم المحطة',
+    'admin.chunks.textPh': 'نص المقتطف المعرفي',
+    'admin.chunks.keywordsPh': 'كلمات مفتاحية (مفصولة بفاصلة)',
+    'admin.chunks.save': 'حفظ المقتطف',
+    'admin.chunks.empty': 'لا توجد مقتطفات بعد.',
+    'admin.chunks.stageBadge': 'محطة {n}',
+    'admin.challenges.addTitle': 'إضافة تحدٍ',
+    'admin.challenges.questionPh': 'نص السؤال',
+    'admin.challenges.optionsPh': 'الخيارات (كل خيار في سطر)',
+    'admin.challenges.orderPh': 'الترتيب الصحيح (للترتيب فقط)',
+    'admin.challenges.answerPh': 'الإجابة الصحيحة',
+    'admin.challenges.hintPh': 'تلميح',
+    'admin.challenges.xpPh': 'نقاط XP',
+    'admin.challenges.explainPh': 'الشرح بعد الإجابة',
+    'admin.challenges.noSource': 'بدون مصدر مرتبط',
+    'admin.challenges.save': 'حفظ التحدي',
+    'admin.challenges.empty': 'لا توجد تحديات بعد.',
+    'admin.challenges.type.mc': 'اختيار من متعدد',
+    'admin.challenges.type.tf': 'صح / خطأ',
+    'admin.challenges.type.ordering': 'ترتيب الأحداث',
+    'admin.challenges.type.knowledge': 'سؤال معرفي',
+    'rag.title': 'تقييم RAG',
+    'rag.desc': 'اكتب سؤالًا لاختبار الاسترجاع والإجابة والمصدر.',
+    'rag.placeholder': 'اكتب سؤال الاختبار…',
+    'rag.run': 'تشغيل الاختبار',
+    'rag.running': 'جارٍ التشغيل…',
+    'rag.found': 'وُجدت مصادر',
+    'rag.insufficient': 'لا يوجد مصدر كافٍ',
+    'rag.chunksTitle': 'المقتطفات المسترجعة ({n})',
+    'rag.noReference': 'بدون مرجع',
+    'rag.sourcesUsed': 'المصادر المستخدمة',
+    'rag.invokeFail': 'فشل الاستدعاء',
+    'logs.empty': 'لا توجد سجلات بعد. اختبر RAG لإنشاء سجلات.'
+  },
+  en: {
+    'nav.home': 'Home',
+    'nav.hijrah': 'The Hijrah Journey',
+    'nav.how': 'How the AI Works',
+    'nav.admin': 'Knowledge Center',
+    'nav.menu': 'Menu',
+    'brand.tagline': "Don't read history… discover it",
+    'lang.label': 'Language',
+    'common.xp': 'Experience points',
+    'common.loading': 'Loading…',
+    'common.available': 'Available',
+    'common.comingSoon': 'Coming soon',
+    'common.locked': 'Locked',
+    'common.completed': 'Completed',
+    'common.current': 'Current',
+    'common.start': 'Start',
+    'common.back': 'Back',
+    'common.close': 'Close',
+    'common.send': 'Send',
+    'common.save': 'Save',
+    'common.reference': 'Reference',
+    'landing.heroBadge': 'Interactive knowledge journeys',
+    'landing.heroSubtitle': "Don't read history… discover it",
+    'landing.heroDesc': 'An interactive platform that turns historical knowledge into a journey you explore yourself — with a smart guide that answers from a verified knowledge base and cites its sources.',
+    'landing.startJourney': 'Start your journey',
+    'landing.exploreJourneys': 'Explore journeys',
+    'landing.featAi': 'AI-powered smart guide',
+    'landing.featSource': 'Source-grounded answers',
+    'landing.featMap': 'Interactive journey map',
+    'landing.featKb': 'Verified knowledge base',
+    'landing.howTitle': 'How does Darb work?',
+    'landing.howSubtitle': 'Seven steps in your knowledge journey',
+    'landing.journeysTitle': 'Choose your journey',
+    'landing.journeysSubtitle': 'Each journey is an interactive knowledge voyage with stages, events and challenges',
+    'landing.ctaTitle': 'Start your journey through the Hijrah',
+    'landing.ctaDesc': 'Ten stages from Mecca to Medina, with a smart guide and verified sources.',
+    'landing.ctaButton': 'Start now',
+    'landing.endlessTitle': 'An endless journey',
+    'landing.endlessDesc': 'New journeys added constantly, each a complete journey.',
+    'landing.footerTagline': 'An interactive knowledge platform to discover Islamic history and biography',
+    'landing.footerNote': 'All knowledge content is linked to its sources. Unverified narrations are never presented as established fact.',
+    'level.title': 'Choose your knowledge level',
+    'level.subtitle': 'The Darb Companion adapts explanations and challenges to your level. You can change it later.',
+    'level.beginner': 'Beginner',
+    'level.intermediate': 'Intermediate',
+    'level.advanced': 'Advanced',
+    'level.beginnerDesc': 'Longer, simpler explanations, easier questions, and more hints.',
+    'level.intermediateDesc': 'Moderate questions with appropriate extra context.',
+    'level.advancedDesc': 'Comparison, verification, and narration-analysis questions.',
+    'level.choose': 'Choose',
+    'map.badge': 'Available journey',
+    'map.startFirst': 'Start from the first stage',
+    'map.current': 'Current stage',
+    'map.completed': 'Completed',
+    'map.locked': 'Locked',
+    'map.explore': 'Start exploring',
+    'map.title': 'The Hijrah Journey',
+    'map.subtitle': "Don't read the Hijrah… discover it",
+    'map.desc': 'An interactive journey to discover the events of the Prophetic Hijrah from Mecca to Medina across ten stages.',
+    'stage.lockedTitle': 'This stage is locked',
+    'stage.lockedDesc': 'Complete the previous stage to unlock this one.',
+    'stage.backToMap': 'Back to the map',
+    'stage.mapLink': 'Map',
+    'stage.stageLabel': 'Stage',
+    'stage.historicalContext': 'Historical context',
+    'stage.eventsTitle': 'Stage events',
+    'stage.challengeTitle': 'Stage challenge',
+    'stage.wellDone': 'Well done! Stage complete',
+    'stage.xpEarned': 'You earned {xp} experience points',
+    'stage.newBadge': 'New badge: {badge}',
+    'stage.nextStage': 'Next stage',
+    'stage.viewMap': 'View map',
+    'stage.noChallenges': 'There are no challenges in this stage yet. You can complete it to continue.',
+    'stage.completeStage': 'Complete the stage',
+    'stage.guideButton': 'Darb Companion',
+    'stage.guideSubtitle': 'Your guide on the journey',
+    'challenge.stageChallenge': 'Stage challenge',
+    'challenge.confirm': 'Confirm answer',
+    'challenge.checkOrder': 'Check the order',
+    'challenge.correct': 'Correct answer!',
+    'challenge.incorrect': 'Incorrect answer',
+    'challenge.hint': 'Hint: {hint}',
+    'challenge.showHint': 'Request a hint',
+    'challenge.remove': 'Remove',
+    'challenge.retry': 'Try again',
+    'guide.title': 'Darb Companion',
+    'guide.subtitle': 'Your guide on the journey',
+    'guide.askPrompt': 'Ask the Darb Companion',
+    'guide.askDesc': 'It answers from the verified knowledge base and cites its sources.',
+    'guide.sourcesUsed': 'Sources used',
+    'guide.noMatchNote': 'No sufficient source was found in the knowledge base.',
+    'guide.inputPlaceholder': 'Type your question…',
+    'guide.errorRetry': 'Could not reach the Darb Companion. Please try again.',
+    'guide.noAnswer': "I don't have a sufficient source in the current knowledge base to answer accurately. You can try another question related to the current stage.",
+    'source.unnamed': 'Unnamed source',
+    'source.viewSource': 'View source',
+    'xpbar.badges': 'badges',
+    'xpbar.progress': 'Journey progress',
+    'how.title': 'How does the AI work?',
+    'how.subtitle': 'Technical transparency: how the Darb Companion answers from the verified knowledge base.',
+    'how.retrievalTitle': 'A note on retrieval',
+    'how.rulesTitle': 'Reliability rules',
+    'admin.title': 'Knowledge Center',
+    'admin.subtitle': 'Manage sources, content, and evaluate the retrieval system',
+    'admin.accessTitle': 'Knowledge Center for administrators',
+    'admin.accessDesc': 'This page is restricted to authorized administrators only.',
+    'admin.noteTitle': 'Note',
+    'admin.noteDesc': 'Unreviewed content is not relied upon as a primary source for the Darb Companion. Review each source’s verification level before activating it.',
+    'admin.tab.overview': 'Overview',
+    'admin.tab.sources': 'Sources',
+    'admin.tab.chunks': 'Chunks',
+    'admin.tab.challenges': 'Challenges',
+    'admin.tab.rag': 'RAG evaluation',
+    'admin.tab.logs': 'Logs',
+    'admin.stat.sources': 'Sources',
+    'admin.stat.chunks': 'Knowledge chunks',
+    'admin.stat.challenges': 'Challenges',
+    'admin.stat.stages': 'Hijrah stages',
+    'admin.stat.logs': 'RAG logs',
+    'admin.stat.insufficient': 'Questions without sufficient source',
+    'admin.sources.addTitle': 'Add a source',
+    'admin.sources.namePh': 'Source name',
+    'admin.sources.refPh': 'Reference (number/page)',
+    'admin.sources.urlPh': 'Link (if any)',
+    'admin.sources.publisherPh': 'Publisher',
+    'admin.sources.descPh': 'Short description',
+    'admin.sources.save': 'Save source',
+    'admin.sources.empty': 'No sources yet.',
+    'admin.sources.disabled': 'Disabled',
+    'admin.sources.toggleTitle': 'Enable/Disable',
+    'admin.chunks.addTitle': 'Add a knowledge chunk',
+    'admin.chunks.pickSource': 'Choose a source…',
+    'admin.chunks.docTitlePh': 'Document title',
+    'admin.chunks.topicPh': 'Topic',
+    'admin.chunks.stagePh': 'Stage number',
+    'admin.chunks.textPh': 'Knowledge chunk text',
+    'admin.chunks.keywordsPh': 'Keywords (comma-separated)',
+    'admin.chunks.save': 'Save chunk',
+    'admin.chunks.empty': 'No chunks yet.',
+    'admin.chunks.stageBadge': 'Stage {n}',
+    'admin.challenges.addTitle': 'Add a challenge',
+    'admin.challenges.questionPh': 'Question text',
+    'admin.challenges.optionsPh': 'Options (one per line)',
+    'admin.challenges.orderPh': 'Correct order (ordering only)',
+    'admin.challenges.answerPh': 'Correct answer',
+    'admin.challenges.hintPh': 'Hint',
+    'admin.challenges.xpPh': 'XP points',
+    'admin.challenges.explainPh': 'Explanation after answering',
+    'admin.challenges.noSource': 'No linked source',
+    'admin.challenges.save': 'Save challenge',
+    'admin.challenges.empty': 'No challenges yet.',
+    'admin.challenges.type.mc': 'Multiple choice',
+    'admin.challenges.type.tf': 'True / False',
+    'admin.challenges.type.ordering': 'Order events',
+    'admin.challenges.type.knowledge': 'Knowledge question',
+    'rag.title': 'RAG evaluation',
+    'rag.desc': 'Write a question to test retrieval, the answer, and the source.',
+    'rag.placeholder': 'Type a test question…',
+    'rag.run': 'Run test',
+    'rag.running': 'Running…',
+    'rag.found': 'Sources found',
+    'rag.insufficient': 'No sufficient source',
+    'rag.chunksTitle': 'Retrieved chunks ({n})',
+    'rag.noReference': 'No reference',
+    'rag.sourcesUsed': 'Sources used',
+    'rag.invokeFail': 'Invocation failed',
+    'logs.empty': 'No logs yet. Test RAG to generate logs.'
+  },
+  fr: {
+    'nav.home': 'Accueil',
+    'nav.hijrah': 'Le Voyage de l’Hégire',
+    'nav.how': 'Comment fonctionne l’IA',
+    'nav.admin': 'Centre de connaissances',
+    'nav.menu': 'Menu',
+    'brand.tagline': 'Ne lisez pas l’histoire… découvrez-la',
+    'lang.label': 'Langue',
+    'common.xp': 'Points d’expérience',
+    'common.loading': 'Chargement…',
+    'common.available': 'Disponible',
+    'common.comingSoon': 'Bientôt',
+    'common.locked': 'Verrouillée',
+    'common.completed': 'Terminée',
+    'common.current': 'Actuelle',
+    'common.start': 'Commencer',
+    'common.back': 'Retour',
+    'common.close': 'Fermer',
+    'common.send': 'Envoyer',
+    'common.save': 'Enregistrer',
+    'common.reference': 'Référence',
+    'landing.heroBadge': 'Voyages de savoir interactifs',
+    'landing.heroSubtitle': 'Ne lisez pas l’histoire… découvrez-la',
+    'landing.heroDesc': 'Une plateforme interactive qui transforme le savoir historique en un voyage que vous explorez vous-même — avec un guide intelligent qui répond depuis une base de savoir vérifiée et cite ses sources.',
+    'landing.startJourney': 'Commencez votre voyage',
+    'landing.exploreJourneys': 'Explorer les voyages',
+    'landing.featAi': 'Guide intelligent par IA',
+    'landing.featSource': 'Réponses fondées sur les sources',
+    'landing.featMap': 'Carte de voyage interactive',
+    'landing.featKb': 'Base de savoir vérifiée',
+    'landing.howTitle': 'Comment fonctionne Darb ?',
+    'landing.howSubtitle': 'Sept étapes dans votre voyage de savoir',
+    'landing.journeysTitle': 'Choisissez votre voyage',
+    'landing.journeysSubtitle': 'Chaque voyage est un parcours de savoir interactif avec des étapes, des événements et des défis',
+    'landing.ctaTitle': 'Commencez votre voyage de l’Hégire',
+    'landing.ctaDesc': 'Dix étapes de La Mecque à Médine, avec un guide intelligent et des sources vérifiées.',
+    'landing.ctaButton': 'Commencer maintenant',
+    'landing.endlessTitle': 'Un voyage sans fin',
+    'landing.endlessDesc': 'De nouveaux voyages ajoutés régulièrement, chacun un voyage complet.',
+    'landing.footerTagline': 'Une plateforme de savoir interactive pour découvrir l’histoire et la biographie islamiques',
+    'landing.footerNote': 'Tout le contenu de savoir est lié à ses sources. Aucune narration non vérifiée n’est présentée comme un fait établi.',
+    'level.title': 'Choisissez votre niveau de savoir',
+    'level.subtitle': 'Le Compagnon Darb adapte les explications et les défis à votre niveau. Vous pouvez le changer plus tard.',
+    'level.beginner': 'Débutant',
+    'level.intermediate': 'Intermédiaire',
+    'level.advanced': 'Avancé',
+    'level.beginnerDesc': 'Explications plus longues et plus simples, questions plus faciles, et plus d’indices.',
+    'level.intermediateDesc': 'Questions modérées avec un contexte supplémentaire approprié.',
+    'level.advancedDesc': 'Questions de comparaison, de vérification et d’analyse des narrations.',
+    'level.choose': 'Choisir',
+    'map.badge': 'Voyage disponible',
+    'map.startFirst': 'Commencer par la première étape',
+    'map.current': 'Étape actuelle',
+    'map.completed': 'Terminée',
+    'map.locked': 'Verrouillée',
+    'map.explore': 'Commencer l’exploration',
+    'map.title': 'Le Voyage de l’Hégire',
+    'map.subtitle': 'Ne lisez pas l’Hégire… découvrez-la',
+    'map.desc': 'Un voyage interactif pour découvrir les événements de l’Hégire prophétique de La Mecque à Médine en dix étapes.',
+    'stage.lockedTitle': 'Cette étape est verrouillée',
+    'stage.lockedDesc': 'Terminez l’étape précédente pour déverrouiller celle-ci.',
+    'stage.backToMap': 'Retour à la carte',
+    'stage.mapLink': 'Carte',
+    'stage.stageLabel': 'Étape',
+    'stage.historicalContext': 'Contexte historique',
+    'stage.eventsTitle': 'Événements de l’étape',
+    'stage.challengeTitle': 'Défi de l’étape',
+    'stage.wellDone': 'Bravo ! Étape terminée',
+    'stage.xpEarned': 'Vous avez gagné {xp} points d’expérience',
+    'stage.newBadge': 'Nouveau badge : {badge}',
+    'stage.nextStage': 'Étape suivante',
+    'stage.viewMap': 'Voir la carte',
+    'stage.noChallenges': 'Il n’y a pas encore de défis dans cette étape. Vous pouvez la terminer pour continuer.',
+    'stage.completeStage': 'Terminer l’étape',
+    'stage.guideButton': 'Compagnon Darb',
+    'stage.guideSubtitle': 'Votre guide sur le voyage',
+    'challenge.stageChallenge': 'Défi de l’étape',
+    'challenge.confirm': 'Confirmer la réponse',
+    'challenge.checkOrder': 'Vérifier l’ordre',
+    'challenge.correct': 'Réponse correcte !',
+    'challenge.incorrect': 'Réponse incorrecte',
+    'challenge.hint': 'Indice : {hint}',
+    'challenge.showHint': 'Demander un indice',
+    'challenge.remove': 'Retirer',
+    'challenge.retry': 'Réessayer',
+    'guide.title': 'Compagnon Darb',
+    'guide.subtitle': 'Votre guide sur le voyage',
+    'guide.askPrompt': 'Posez une question au Compagnon Darb',
+    'guide.askDesc': 'Il répond depuis la base de savoir vérifiée et cite ses sources.',
+    'guide.sourcesUsed': 'Sources utilisées',
+    'guide.noMatchNote': 'Aucune source suffisante n’a été trouvée dans la base de savoir.',
+    'guide.inputPlaceholder': 'Saisissez votre question…',
+    'guide.errorRetry': 'Impossible de joindre le Compagnon Darb. Veuillez réessayer.',
+    'guide.noAnswer': "Je n'ai pas de source suffisante dans la base de savoir actuelle pour répondre avec précision. Vous pouvez essayer une autre question liée à l'étape actuelle.",
+    'source.unnamed': 'Source sans nom',
+    'source.viewSource': 'Voir la source',
+    'xpbar.badges': 'badges',
+    'xpbar.progress': 'Progression du voyage',
+    'how.title': 'Comment fonctionne l’IA ?',
+    'how.subtitle': 'Transparence technique : comment le Compagnon Darb répond depuis la base de savoir vérifiée.',
+    'how.retrievalTitle': 'Une note sur la récupération',
+    'how.rulesTitle': 'Règles de fiabilité',
+    'admin.title': 'Centre de connaissances',
+    'admin.subtitle': 'Gérer les sources, le contenu et évaluer le système de récupération',
+    'admin.accessTitle': 'Centre de connaissances pour administrateurs',
+    'admin.accessDesc': 'Cette page est réservée aux administrateurs autorisés uniquement.',
+    'admin.noteTitle': 'Note',
+    'admin.noteDesc': 'Le contenu non révisé n’est pas utilisé comme source principale pour le Compagnon Darb. Vérifiez le degré de vérification de chaque source avant de l’activer.',
+    'admin.tab.overview': 'Aperçu',
+    'admin.tab.sources': 'Sources',
+    'admin.tab.chunks': 'Extraits',
+    'admin.tab.challenges': 'Défis',
+    'admin.tab.rag': 'Évaluation RAG',
+    'admin.tab.logs': 'Journaux',
+    'admin.stat.sources': 'Sources',
+    'admin.stat.chunks': 'Extraits de savoir',
+    'admin.stat.challenges': 'Défis',
+    'admin.stat.stages': 'Étapes de l’Hégire',
+    'admin.stat.logs': 'Journaux RAG',
+    'admin.stat.insufficient': 'Questions sans source suffisante',
+    'admin.sources.addTitle': 'Ajouter une source',
+    'admin.sources.namePh': 'Nom de la source',
+    'admin.sources.refPh': 'Référence (numéro/page)',
+    'admin.sources.urlPh': 'Lien (s’il y en a)',
+    'admin.sources.publisherPh': 'Éditeur',
+    'admin.sources.descPh': 'Brève description',
+    'admin.sources.save': 'Enregistrer la source',
+    'admin.sources.empty': 'Aucune source pour l’instant.',
+    'admin.sources.disabled': 'Désactivée',
+    'admin.sources.toggleTitle': 'Activer/Désactiver',
+    'admin.chunks.addTitle': 'Ajouter un extrait de savoir',
+    'admin.chunks.pickSource': 'Choisir une source…',
+    'admin.chunks.docTitlePh': 'Titre du document',
+    'admin.chunks.topicPh': 'Sujet',
+    'admin.chunks.stagePh': 'Numéro d’étape',
+    'admin.chunks.textPh': 'Texte de l’extrait de savoir',
+    'admin.chunks.keywordsPh': 'Mots-clés (séparés par des virgules)',
+    'admin.chunks.save': 'Enregistrer l’extrait',
+    'admin.chunks.empty': 'Aucun extrait pour l’instant.',
+    'admin.chunks.stageBadge': 'Étape {n}',
+    'admin.challenges.addTitle': 'Ajouter un défi',
+    'admin.challenges.questionPh': 'Texte de la question',
+    'admin.challenges.optionsPh': 'Options (une par ligne)',
+    'admin.challenges.orderPh': 'Ordre correct (ordre uniquement)',
+    'admin.challenges.answerPh': 'Réponse correcte',
+    'admin.challenges.hintPh': 'Indice',
+    'admin.challenges.xpPh': 'Points XP',
+    'admin.challenges.explainPh': 'Explication après la réponse',
+    'admin.challenges.noSource': 'Aucune source liée',
+    'admin.challenges.save': 'Enregistrer le défi',
+    'admin.challenges.empty': 'Aucun défi pour l’instant.',
+    'admin.challenges.type.mc': 'Choix multiples',
+    'admin.challenges.type.tf': 'Vrai / Faux',
+    'admin.challenges.type.ordering': 'Ordonner les événements',
+    'admin.challenges.type.knowledge': 'Question de savoir',
+    'rag.title': 'Évaluation RAG',
+    'rag.desc': 'Écrivez une question pour tester la récupération, la réponse et la source.',
+    'rag.placeholder': 'Saisissez une question de test…',
+    'rag.run': 'Lancer le test',
+    'rag.running': 'En cours…',
+    'rag.found': 'Sources trouvées',
+    'rag.insufficient': 'Aucune source suffisante',
+    'rag.chunksTitle': 'Extraits récupérés ({n})',
+    'rag.noReference': 'Aucune référence',
+    'rag.sourcesUsed': 'Sources utilisées',
+    'rag.invokeFail': 'Échec de l’appel',
+    'logs.empty': 'Aucun journal pour l’instant. Testez RAG pour générer des journaux.'
+  }
+};
+
+// ===== خطوات «كيف يعمل دَرْب» (الصفحة الرئيسية) =====
+const HOW_STEPS = {
+  ar: [
+    { n: '1', title: 'اختر دربك', desc: 'ابدأ باختيار رحلة معرفية تناسب اهتمامك.' },
+    { n: '2', title: 'استكشف', desc: 'تنقّل بين محطات الرحلة على الخريطة التفاعلية.' },
+    { n: '3', title: 'تعلّم', desc: 'اقرأ السياق التاريخي لكل محطة بأسلوب سردي.' },
+    { n: '4', title: 'اسأل رفيق الدرب', desc: 'وجّه أسئلتك للمرشد الذكي في أي محطة.' },
+    { n: '5', title: 'تحقّق من المصدر', desc: 'كل إجابة معرفية مرتبطة بمصدرها ودرجة توثيقها.' },
+    { n: '6', title: 'حلّ التحدي', desc: 'اختبر فهمك بتحديات تكيّفت مع مستواك.' },
+    { n: '7', title: 'افتح المرحلة التالية', desc: 'اكسب نقاط الخبرة والشارات، وتابع رحلتك.' }
+  ],
+  en: [
+    { n: '1', title: 'Choose your journey', desc: 'Start by choosing a knowledge journey that suits your interest.' },
+    { n: '2', title: 'Explore', desc: 'Move between the journey’s stages on the interactive map.' },
+    { n: '3', title: 'Learn', desc: 'Read the historical context of each stage in a narrative style.' },
+    { n: '4', title: 'Ask the Darb Companion', desc: 'Ask the smart guide questions at any stage.' },
+    { n: '5', title: 'Verify the source', desc: 'Every knowledge answer is linked to its source and verification level.' },
+    { n: '6', title: 'Solve the challenge', desc: 'Test your understanding with challenges adapted to your level.' },
+    { n: '7', title: 'Unlock the next stage', desc: 'Earn experience points and badges, and continue your journey.' }
+  ],
+  fr: [
+    { n: '1', title: 'Choisissez votre voyage', desc: 'Commencez par choisir un voyage de savoir adapté à vos centres d’intérêt.' },
+    { n: '2', title: 'Explorez', desc: 'Déplacez-vous entre les étapes du voyage sur la carte interactive.' },
+    { n: '3', title: 'Apprenez', desc: 'Lisez le contexte historique de chaque étape dans un style narratif.' },
+    { n: '4', title: 'Demandez au Compagnon Darb', desc: 'Posez vos questions au guide intelligent à toute étape.' },
+    { n: '5', title: 'Vérifiez la source', desc: 'Chaque réponse de savoir est liée à sa source et son niveau de vérification.' },
+    { n: '6', title: 'Relevez le défi', desc: 'Testez votre compréhension avec des défis adaptés à votre niveau.' },
+    { n: '7', title: 'Débloquez la prochaine étape', desc: 'Gagnez des points d’expérience et des badges, et poursuivez votre voyage.' }
+  ]
+};
+
+// ===== خطوات صفحة «كيف يعمل الذكاء» =====
+const HOW_PIPELINE = {
+  ar: [
+    { title: 'سؤال المستخدم', desc: 'يوجّه المستخدم سؤالًا لرفيق الدرب داخل المحطة.' },
+    { title: 'فهم القصد', desc: 'يُحلَّل السؤال ويُحدَّد الدرب والمحطة الحالية.' },
+    { title: 'الاسترجاع', desc: 'يُبحث في قاعدة المعرفة الموثقة عن المقتطفات ذات الصلة.' },
+    { title: 'المعرفة الموثقة', desc: 'تُستخدم المقتطفات المسترجعة كسياق حصري للإجابة.' },
+    { title: 'التوليد', desc: 'يولّد النموذج إجابة مبنية على السياق فقط.' },
+    { title: 'الإجابة + المصدر', desc: 'تُعرض الإجابة مع المصدر ودرجة توثيقه.' }
+  ],
+  en: [
+    { title: 'The user’s question', desc: 'The user asks the Darb Companion a question within the stage.' },
+    { title: 'Understanding intent', desc: 'The question is analyzed and the current journey and stage are identified.' },
+    { title: 'Retrieval', desc: 'Relevant excerpts are searched in the verified knowledge base.' },
+    { title: 'Verified knowledge', desc: 'Retrieved excerpts are used as the exclusive context for the answer.' },
+    { title: 'Generation', desc: 'The model generates an answer based only on the context.' },
+    { title: 'Answer + source', desc: 'The answer is shown with its source and verification level.' }
+  ],
+  fr: [
+    { title: 'La question de l’utilisateur', desc: 'L’utilisateur pose une question au Compagnon Darb dans l’étape.' },
+    { title: 'Comprendre l’intention', desc: 'La question est analysée et le voyage et l’étape actuels sont identifiés.' },
+    { title: 'Récupération', desc: 'Les extraits pertinents sont recherchés dans la base de savoir vérifiée.' },
+    { title: 'Savoir vérifié', desc: 'Les extraits récupérés sont utilisés comme contexte exclusif pour la réponse.' },
+    { title: 'Génération', desc: 'Le modèle génère une réponse basée uniquement sur le contexte.' },
+    { title: 'Réponse + source', desc: 'La réponse est affichée avec sa source et son niveau de vérification.' }
+  ]
+};
+
+const HOW_RETRIEVAL_DESC = {
+  ar: 'يستخدم رفيق الدرب طبقة استرجاع (Retrieval) من قاعدة المعرفة الموثقة. النسخة الحالية تعتمد استرجاعًا قائمًا على الكلمات المفتاحية مع تطبيع للعربية، وهي مصممة لاستبدالها لاحقًا بمزود embeddings خارجي عبر مفتاح سري دون تغيير بقية النظام. لا يدّعي النظام استخدام استرجاع دلالي (semantic) إلا بعد تنفيذه فعليًا.',
+  en: 'The Darb Companion uses a retrieval layer over the verified knowledge base. The current version uses keyword-based retrieval with Arabic normalization, designed to be replaced later by an external embeddings provider via a secret key without changing the rest of the system. The system does not claim to use semantic retrieval until it is actually implemented.',
+  fr: 'Le Compagnon Darb utilise une couche de récupération sur la base de savoir vérifiée. La version actuelle utilise une récupération par mots-clés avec normalisation arabe, conçue pour être remplacée ultérieurement par un fournisseur d’embeddings externe via une clé secrète sans modifier le reste du système. Le système ne prétend pas utiliser la récupération sémantique tant qu’elle n’est pas réellement implémentée.'
+};
+
+const HOW_RULES = {
+  ar: [
+    'لا تُخترع مصادر أو أرقام أحاديث أو درجات صحة.',
+    'لا تُقدّم الرواية الضعيفة كحقيقة قاطعة.',
+    'عند عدم كفاية المصدر، يُعلن رفيق الدرب ذلك صراحة.',
+    'كل إجابة معرفية مرتبطة بمصدرها ودرجة توثيقه.'
+  ],
+  en: [
+    'No sources, hadith numbers, or authenticity grades are invented.',
+    'Weak narrations are not presented as established fact.',
+    'When sources are insufficient, the Darb Companion states so explicitly.',
+    'Every knowledge answer is linked to its source and verification level.'
+  ],
+  fr: [
+    'Aucune source, numéro de hadith ou degré d’authenticité n’est inventé.',
+    'Les narrations faibles ne sont pas présentées comme des faits établis.',
+    'Quand les sources sont insuffisantes, le Compagnon Darb le déclare explicitement.',
+    'Chaque réponse de savoir est liée à sa source et à son degré de vérification.'
+  ]
+};
+
+// ===== وصف الدروب (واجهة — ليس محتوى معرفيًا) =====
+const JOURNEY_META = {
+  hijrah: {
+    ar: { title: 'درب الهجرة', subtitle: 'لا تقرأ الهجرة… اكتشفها', description: 'اكتشف رحلة الهجرة النبوية من مكة إلى المدينة خطوة بخطوة.' },
+    en: { title: 'The Hijrah Journey', subtitle: "Don't read the Hijrah… discover it", description: 'Discover the Prophetic Hijrah from Mecca to Medina, step by step.' },
+    fr: { title: 'Le Voyage de l’Hégire', subtitle: 'Ne lisez pas l’Hégire… découvrez-la', description: 'Découvrez l’Hégire prophétique de La Mecque à Médine, étape par étape.' }
+  },
+  dawah: {
+    ar: { title: 'درب الدعوة', subtitle: 'بدايات الدعوة', description: 'اكتشف بدايات الدعوة ومراحلها.' },
+    en: { title: 'The Call Journey', subtitle: 'The beginnings of the Call', description: 'Discover the beginnings of the Call and its stages.' },
+    fr: { title: 'Le Voyage de l’Appel', subtitle: 'Les débuts de l’Appel', description: 'Découvrez les débuts de l’Appel et ses étapes.' }
+  },
+  'dawah-jahriyah': {
+    ar: { title: 'درب الدعوة الجهرية', subtitle: 'المرحلة الجهرية', description: 'اكتشف مرحلة الدعوة الجهرية وما ارتبط بها من أحداث.' },
+    en: { title: 'The Open Call Journey', subtitle: 'The open phase', description: 'Discover the open phase of the Call and its related events.' },
+    fr: { title: 'Le Voyage de l’Appel Public', subtitle: 'La phase publique', description: 'Découvrez la phase publique de l’Appel et ses événements liés.' }
+  },
+  madinah: {
+    ar: { title: 'درب المدينة', subtitle: 'بداية المرحلة الجديدة', description: 'اكتشف المدينة وبدايات المرحلة الجديدة بعد الهجرة.' },
+    en: { title: 'The Madinah Journey', subtitle: 'A new phase begins', description: 'Discover Madinah and the beginnings of the new phase after the Hijrah.' },
+    fr: { title: 'Le Voyage de Médine', subtitle: 'Une nouvelle phase', description: 'Découvrez Médine et les débuts de la nouvelle phase après l’Hégire.' }
+  },
+  athar: {
+    ar: { title: 'درب الأثر', subtitle: 'المعالم التاريخية', description: 'رحلة مستقبلية لاكتشاف المواقع التاريخية والمعالم المرتبطة بالسيرة.' },
+    en: { title: 'The Traces Journey', subtitle: 'Historical landmarks', description: 'A future journey to discover historical sites and landmarks tied to the biography.' },
+    fr: { title: 'Le Voyage des Traces', subtitle: 'Sites historiques', description: 'Un voyage à venir pour découvrir les sites historiques liés à la biographie.' }
+  }
+};
+
+// ===== عناوين محطات درب الهجرة (تسميات الواجهة — المحتوى المعرفي يبقى بالعربية) =====
+const STAGE_META = {
+  1: { ar: { title: 'مكة والاستعداد', subtitle: 'الإذن بالهجرة' }, en: { title: 'Mecca and Preparation', subtitle: 'Permission to Emigrate' }, fr: { title: 'La Mecque et la Préparation', subtitle: 'La permission d’émigrer' } },
+  2: { ar: { title: 'الخروج من مكة', subtitle: 'ليلة الهجرة' }, en: { title: 'Leaving Mecca', subtitle: 'The Night of the Hijrah' }, fr: { title: 'Le départ de La Mecque', subtitle: 'La nuit de l’Hégire' } },
+  3: { ar: { title: 'غار ثور', subtitle: 'الاختباء' }, en: { title: 'Cave of Thawr', subtitle: 'Taking Shelter' }, fr: { title: 'La grotte de Thawr', subtitle: 'L’abri' } },
+  4: { ar: { title: 'ثلاثة أيام في الغار', subtitle: 'الإمداد ونقل الأخبار' }, en: { title: 'Three Days in the Cave', subtitle: 'Supply and News' }, fr: { title: 'Trois jours dans la grotte', subtitle: 'Ravitaillement et nouvelles' } },
+  5: { ar: { title: 'الانطلاق في طريق الهجرة', subtitle: 'طريق الساحل' }, en: { title: 'Setting Out on the Hijrah', subtitle: 'The Coastal Route' }, fr: { title: 'Sur la route de l’Hégire', subtitle: 'La route côtière' } },
+  6: { ar: { title: 'مطاردة سراقة', subtitle: 'طلب الأمان' }, en: { title: 'The Pursuit by Suraqah', subtitle: 'Seeking Safety' }, fr: { title: 'La poursuite de Suraqa', subtitle: 'En quête de sécurité' } },
+  7: { ar: { title: 'خيمة أم معبد', subtitle: 'المرور بأم معبد' }, en: { title: "The Tent of Umm Ma'bad", subtitle: "Passing by Umm Ma'bad" }, fr: { title: 'La tente d’Umm Ma’bad', subtitle: 'Le passage chez Umm Ma’bad' } },
+  8: { ar: { title: 'الاقتراب من المدينة', subtitle: 'استقبال الأنصار' }, en: { title: 'Approaching Madinah', subtitle: "The Ansar's Welcome" }, fr: { title: 'L’approche de Médine', subtitle: 'L’accueil des Ansar' } },
+  9: { ar: { title: 'قباء', subtitle: 'أول مسجد' }, en: { title: 'Quba', subtitle: 'The First Mosque' }, fr: { title: 'Quba', subtitle: 'La première mosquée' } },
+  10: { ar: { title: 'الوصول إلى المدينة', subtitle: 'بداية المرحلة المدنية' }, en: { title: 'Arrival in Madinah', subtitle: 'The Madinan Phase Begins' }, fr: { title: 'L’arrivée à Médine', subtitle: 'La phase médinoise commence' } }
+};
+
+const VERIFICATION_LABELS = {
+  ar: { verified: 'موثّق', historical: 'رواية تاريخية', needs_clarification: 'يحتاج بيان', insufficient: 'غير كافٍ' },
+  en: { verified: 'Verified', historical: 'Historical report', needs_clarification: 'Needs clarification', insufficient: 'Insufficient' },
+  fr: { verified: 'Vérifié', historical: 'Récit historique', needs_clarification: 'À clarifier', insufficient: 'Insuffisant' }
+};
+
+const SOURCE_TYPE_LABELS = {
+  ar: { hadith: 'حديث', historical: 'رواية تاريخية', secondary: 'مصدر ثانوي', insufficient: 'معلومة غير كافية' },
+  en: { hadith: 'Hadith', historical: 'Historical report', secondary: 'Secondary source', insufficient: 'Insufficient information' },
+  fr: { hadith: 'Hadith', historical: 'Récit historique', secondary: 'Source secondaire', insufficient: 'Information insuffisante' }
+};
+
+const LEVEL_LABELS = {
+  ar: { beginner: 'مبتدئ', intermediate: 'متوسط', advanced: 'متقدم' },
+  en: { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' },
+  fr: { beginner: 'Débutant', intermediate: 'Intermédiaire', advanced: 'Avancé' }
+};
+
+// ===== السياق =====
+const I18nContext = createContext(null);
+
+export function LanguageProvider({ children }) {
+  const [lang, setLangState] = useState(readLang);
+  const dir = LANGUAGES.find((l) => l.code === lang)?.dir || 'rtl';
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+      document.documentElement.dir = dir;
+    }
+  }, [lang, dir]);
+
+  const setLang = useCallback((next) => {
+    setLangState(next);
+    try { localStorage.setItem(LANG_KEY, next); } catch { /* ignore */ }
+  }, []);
+
+  const value = { lang, setLang, dir };
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+}
+
+export function useI18n() {
+  const ctx = useContext(I18nContext);
+  const lang = ctx?.lang || DEFAULT_LANG;
+  const setLang = ctx?.setLang || (() => {});
+  const dir = ctx?.dir || 'rtl';
+
+  const t = useCallback((key, vars) => {
+    let str = T[lang]?.[key] ?? T.ar[key] ?? key;
+    if (vars) {
+      for (const [k, v] of Object.entries(vars)) {
+        str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+      }
+    }
+    return str;
+  }, [lang]);
+
+  const journeyMeta = useCallback((slug) => {
+    const m = JOURNEY_META[slug];
+    return m ? (m[lang] || m.ar) : null;
+  }, [lang]);
+
+  const stageMeta = useCallback((order) => {
+    const m = STAGE_META[order];
+    return m ? (m[lang] || m.ar) : null;
+  }, [lang]);
+
+  const verificationLabel = useCallback((status) => VERIFICATION_LABELS[lang]?.[status] || VERIFICATION_LABELS.ar[status] || status, [lang]);
+  const sourceTypeLabel = useCallback((type) => SOURCE_TYPE_LABELS[lang]?.[type] || SOURCE_TYPE_LABELS.ar[type] || type, [lang]);
+  const levelLabel = useCallback((level) => LEVEL_LABELS[lang]?.[level] || LEVEL_LABELS.ar[level] || level, [lang]);
+
+  return {
+    lang, setLang, dir,
+    t,
+    howSteps: HOW_STEPS[lang] || HOW_STEPS.ar,
+    howPipeline: HOW_PIPELINE[lang] || HOW_PIPELINE.ar,
+    howRetrievalDesc: HOW_RETRIEVAL_DESC[lang] || HOW_RETRIEVAL_DESC.ar,
+    howRules: HOW_RULES[lang] || HOW_RULES.ar,
+    journeyMeta, stageMeta,
+    verificationLabel, sourceTypeLabel, levelLabel
+  };
+}

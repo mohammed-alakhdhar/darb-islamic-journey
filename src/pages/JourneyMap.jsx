@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import XPBar from '@/components/XPBar';
 import { base44 } from '@/api/base44Client';
 import { useUserProgress } from '@/lib/darb';
+import { useI18n } from '@/lib/i18n';
 
 const STAGES_FALLBACK = [
   { order: 1, title: 'مكة والاستعداد', subtitle: 'الإذن بالهجرة', environment: 'مكة', location: 'مكة المكرمة' },
@@ -30,6 +31,7 @@ const ENV_COLORS = {
 export default function JourneyMap({ journeySlug = 'hijrah' }) {
   const navigate = useNavigate();
   const { progress, loading, update } = useUserProgress();
+  const { t, journeyMeta, stageMeta } = useI18n();
   const [stages, setStages] = useState(STAGES_FALLBACK);
   const [journey, setJourney] = useState(null);
 
@@ -59,8 +61,18 @@ export default function JourneyMap({ journeySlug = 'hijrah' }) {
   };
 
   const total = stages.length;
-  const title = journey?.title || 'درب الهجرة';
-  const subtitle = journey?.subtitle || 'لا تقرأ الهجرة… اكتشفها';
+  const jMeta = journeyMeta(journeySlug) || {};
+  const title = jMeta.title || journey?.title || t('map.title');
+  const subtitle = jMeta.subtitle || journey?.subtitle || t('map.subtitle');
+  const description = jMeta.description || journey?.description || t('map.desc');
+
+  const stageDisplay = (stage) => {
+    const meta = stageMeta(stage.order);
+    return {
+      title: meta?.title || stage.title,
+      subtitle: meta?.subtitle || stage.subtitle
+    };
+  };
 
   return (
     <div className="min-h-screen gradient-sand">
@@ -71,15 +83,13 @@ export default function JourneyMap({ journeySlug = 'hijrah' }) {
           <div className="absolute inset-0 bg-arabesque opacity-25" />
           <div className="relative">
             <div className="inline-flex items-center gap-2 rounded-full bg-darb-gold/20 text-darb-gold px-3 py-1 text-xs font-medium mb-3">
-              <Compass className="h-3.5 w-3.5" /> درب متاح
+              <Compass className="h-3.5 w-3.5" /> {t('map.badge')}
             </div>
             <h1 className="font-display text-3xl sm:text-4xl font-bold">{title}</h1>
             <p className="mt-2 text-primary-foreground/80 font-medium">{subtitle}</p>
-            <p className="mt-3 text-sm text-primary-foreground/70 max-w-2xl">
-              {journey?.description || 'رحلة تفاعلية لاكتشاف أحداث الهجرة النبوية من مكة إلى المدينة عبر عشر محطات.'}
-            </p>
+            <p className="mt-3 text-sm text-primary-foreground/70 max-w-2xl">{description}</p>
             <button onClick={startDemo} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-darb-gold px-6 py-3 text-sm font-semibold text-darb-navy hover:bg-darb-gold/90">
-              <Play className="h-4 w-4" /> ابدأ من المحطة الأولى
+              <Play className="h-4 w-4" /> {t('map.startFirst')}
             </button>
           </div>
         </div>
@@ -98,6 +108,7 @@ export default function JourneyMap({ journeySlug = 'hijrah' }) {
               const done = isCompleted(stage.order);
               const current = isCurrent(stage.order);
               const env = ENV_COLORS[stage.environment] || 'from-darb-navy to-primary';
+              const disp = stageDisplay(stage);
               return (
                 <div key={stage.order} className="relative flex items-start gap-4">
                   {/* العقدة */}
@@ -121,17 +132,17 @@ export default function JourneyMap({ journeySlug = 'hijrah' }) {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-display text-lg font-bold text-foreground">{stage.title}</h3>
-                          {current && <span className="rounded-full bg-darb-gold/20 text-darb-gold px-2 py-0.5 text-xs font-medium">المحطة الحالية</span>}
-                          {done && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-medium">مكتملة</span>}
-                          {!unlocked && <span className="rounded-full bg-muted text-muted-foreground px-2 py-0.5 text-xs">مقفلة</span>}
+                          <h3 className="font-display text-lg font-bold text-foreground">{disp.title}</h3>
+                          {current && <span className="rounded-full bg-darb-gold/20 text-darb-gold px-2 py-0.5 text-xs font-medium">{t('map.current')}</span>}
+                          {done && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-medium">{t('common.completed')}</span>}
+                          {!unlocked && <span className="rounded-full bg-muted text-muted-foreground px-2 py-0.5 text-xs">{t('common.locked')}</span>}
                         </div>
-                        {stage.subtitle && <p className="mt-1 text-sm text-muted-foreground">{stage.subtitle}</p>}
+                        {disp.subtitle && <p className="mt-1 text-sm text-muted-foreground">{disp.subtitle}</p>}
                         <div className="mt-2.5 flex items-center gap-3 text-xs text-muted-foreground">
                           <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {stage.location}</span>
                           {unlocked && !done && (
                             <span className="inline-flex items-center gap-1 text-primary font-medium">
-                              <Sparkles className="h-3.5 w-3.5" /> ابدأ الاستكشاف
+                              <Sparkles className="h-3.5 w-3.5" /> {t('map.explore')}
                             </span>
                           )}
                         </div>

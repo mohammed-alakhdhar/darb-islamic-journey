@@ -1,6 +1,8 @@
 import { Sparkles, Award } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 
 export default function XPBar({ xp, completed, total, badges = [] }) {
+  const { t } = useI18n();
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
@@ -10,7 +12,7 @@ export default function XPBar({ xp, completed, total, badges = [] }) {
             <Sparkles className="h-4.5 w-4.5" />
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">نقاط الخبرة</div>
+            <div className="text-xs text-muted-foreground">{t('common.xp')}</div>
             <div className="font-display text-lg font-bold text-foreground leading-none">{xp} XP</div>
           </div>
         </div>
@@ -18,14 +20,14 @@ export default function XPBar({ xp, completed, total, badges = [] }) {
           <div className="flex items-center gap-1.5">
             <Award className="h-4 w-4 text-darb-gold" />
             <span className="text-sm font-semibold text-foreground">{badges.length}</span>
-            <span className="text-xs text-muted-foreground">شارة</span>
+            <span className="text-xs text-muted-foreground">{t('xpbar.badges')}</span>
           </div>
         )}
       </div>
       {total > 0 && (
         <div className="mt-3">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
-            <span>تقدّم الرحلة</span>
+            <span>{t('xpbar.progress')}</span>
             <span>{completed} / {total}</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
