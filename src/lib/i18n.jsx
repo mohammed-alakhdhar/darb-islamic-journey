@@ -186,7 +186,19 @@ const T = {
     'rag.noReference': 'بدون مرجع',
     'rag.sourcesUsed': 'المصادر المستخدمة',
     'rag.invokeFail': 'فشل الاستدعاء',
-    'logs.empty': 'لا توجد سجلات بعد. اختبر RAG لإنشاء سجلات.'
+    'logs.empty': 'لا توجد سجلات بعد. اختبر RAG لإنشاء سجلات.',
+    'map.heroTitle': 'الهجرة النبوية ﷺ',
+    'map.heroSubtitle': 'رحلة إيمان وصبر وتخطيط وتحول غيّر مجرى التاريخ',
+    'map.startJourney': 'ابدأ الرحلة',
+    'map.exploreStory': 'استكشف القصة',
+    'map.exploreStage': 'استكشف المحطة',
+    'map.progressLabel': 'تقدّمك في الرحلة',
+    'map.stagesCompleted': 'محطات مكتملة',
+    'map.landmarkOf': 'المحطة {n} من {total}',
+    'map.nodeCompleted': 'مكتملة',
+    'map.nodeCurrent': 'الحالية',
+    'map.nodeLocked': 'مقفلة',
+    'map.nodeExplore': 'استكشف'
   },
   en: {
     'nav.home': 'Home',
@@ -354,7 +366,19 @@ const T = {
     'rag.noReference': 'No reference',
     'rag.sourcesUsed': 'Sources used',
     'rag.invokeFail': 'Invocation failed',
-    'logs.empty': 'No logs yet. Test RAG to generate logs.'
+    'logs.empty': 'No logs yet. Test RAG to generate logs.',
+    'map.heroTitle': 'The Prophetic Hijrah ﷺ',
+    'map.heroSubtitle': 'A journey of faith, patience, planning and transformation that changed the course of history',
+    'map.startJourney': 'Begin the journey',
+    'map.exploreStory': 'Explore the story',
+    'map.exploreStage': 'Explore the stage',
+    'map.progressLabel': 'Your journey progress',
+    'map.stagesCompleted': 'stages completed',
+    'map.landmarkOf': 'Stage {n} of {total}',
+    'map.nodeCompleted': 'Completed',
+    'map.nodeCurrent': 'Current',
+    'map.nodeLocked': 'Locked',
+    'map.nodeExplore': 'Explore'
   },
   fr: {
     'nav.home': 'Accueil',
@@ -522,7 +546,19 @@ const T = {
     'rag.noReference': 'Aucune référence',
     'rag.sourcesUsed': 'Sources utilisées',
     'rag.invokeFail': 'Échec de l’appel',
-    'logs.empty': 'Aucun journal pour l’instant. Testez RAG pour générer des journaux.'
+    'logs.empty': 'Aucun journal pour l’instant. Testez RAG pour générer des journaux.',
+    'map.heroTitle': 'L’Hégire prophétique ﷺ',
+    'map.heroSubtitle': 'Un voyage de foi, de patience, de planification et de transformation qui a changé le cours de l’histoire',
+    'map.startJourney': 'Commencer le voyage',
+    'map.exploreStory': 'Explorer le récit',
+    'map.exploreStage': 'Explorer l’étape',
+    'map.progressLabel': 'Votre progression',
+    'map.stagesCompleted': 'étapes terminées',
+    'map.landmarkOf': 'Étape {n} sur {total}',
+    'map.nodeCompleted': 'Terminée',
+    'map.nodeCurrent': 'Actuelle',
+    'map.nodeLocked': 'Verrouillée',
+    'map.nodeExplore': 'Explorer'
   }
 };
 
