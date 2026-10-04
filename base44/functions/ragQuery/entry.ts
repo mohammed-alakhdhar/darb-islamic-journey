@@ -60,7 +60,7 @@ export default async function(req) {
 
     if (!retrieved.length) {
       const noAnswer = "لا أملك في قاعدة المعرفة الحالية مصدرًا كافيًا للإجابة بدقة. يمكنك تجربة سؤال آخر مرتبط بالمحطة الحالية.";
-      waitUntilLog(base44, { question, journey_slug: journeySlug, stage_order: stageOrder, retrieved_chunks: [], sources: [], answer: noAnswer, retrieval_status: 'no_match', confidence: 'none' });
+      logRag(base44, { question, journey_slug: journeySlug, stage_order: stageOrder, retrieved_chunks: [], sources: [], answer: noAnswer, retrieval_status: 'no_match', confidence: 'none' });
       return Response.json({
         answer: noAnswer,
         sources: [],
@@ -127,7 +127,7 @@ ${context}
       topic: c.topic,
       stage_order: c.stage_order
     }));
-    waitUntilLog(base44, {
+    logRag(base44, {
       question, journey_slug: journeySlug, stage_order: stageOrder,
       retrieved_chunks: chunkSummary,
       sources: sources.map((s) => s.name).filter(Boolean),
