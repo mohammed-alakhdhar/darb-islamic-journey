@@ -1,0 +1,87 @@
+{
+  "name": "Challenge",
+  "type": "object",
+  "properties": {
+    "journey_slug": {
+      "type": "string"
+    },
+    "stage_order": {
+      "type": "number"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "multiple_choice",
+        "true_false",
+        "ordering",
+        "source_id",
+        "knowledge"
+      ],
+      "default": "multiple_choice"
+    },
+    "question": {
+      "type": "string"
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "correct_answer": {
+      "type": "string"
+    },
+    "correct_order": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "explanation": {
+      "type": "string"
+    },
+    "hint": {
+      "type": "string"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "default": "beginner"
+    },
+    "xp_reward": {
+      "type": "number",
+      "default": 50
+    },
+    "source_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "journey_slug",
+    "stage_order",
+    "type",
+    "question"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

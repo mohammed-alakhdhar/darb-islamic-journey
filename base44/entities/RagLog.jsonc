@@ -1,0 +1,72 @@
+{
+  "name": "RagLog",
+  "type": "object",
+  "properties": {
+    "question": {
+      "type": "string"
+    },
+    "journey_slug": {
+      "type": "string"
+    },
+    "stage_order": {
+      "type": "number"
+    },
+    "retrieved_chunks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "answer": {
+      "type": "string"
+    },
+    "retrieval_status": {
+      "type": "string",
+      "enum": [
+        "found",
+        "insufficient",
+        "no_match"
+      ],
+      "default": "found"
+    },
+    "confidence": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "question"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "name": "UserProgress",
+  "type": "object",
+  "properties": {
+    "knowledge_level": {
+      "type": "string",
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "default": "beginner"
+    },
+    "current_journey": {
+      "type": "string",
+      "default": "hijrah"
+    },
+    "current_stage": {
+      "type": "number",
+      "default": 1
+    },
+    "xp": {
+      "type": "number",
+      "default": 0
+    },
+    "badges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "completed_stages": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "completed_challenges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "knowledge_level"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "name": "HistoricalEvent",
+  "type": "object",
+  "properties": {
+    "journey_slug": {
+      "type": "string"
+    },
+    "stage_order": {
+      "type": "number"
+    },
+    "title": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "full_content": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "people": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "historical",
+        "needs_clarification",
+        "insufficient"
+      ],
+      "default": "verified"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "default": "beginner"
+    }
+  },
+  "required": [
+    "journey_slug",
+    "stage_order",
+    "title"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

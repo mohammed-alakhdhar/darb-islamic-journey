@@ -1,0 +1,75 @@
+{
+  "name": "KnowledgeChunk",
+  "type": "object",
+  "properties": {
+    "source_id": {
+      "type": "string"
+    },
+    "source_name": {
+      "type": "string"
+    },
+    "document_title": {
+      "type": "string"
+    },
+    "chunk_text": {
+      "type": "string"
+    },
+    "journey_slug": {
+      "type": "string"
+    },
+    "stage_order": {
+      "type": "number"
+    },
+    "topic": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "historical",
+        "needs_clarification",
+        "insufficient"
+      ],
+      "default": "verified"
+    },
+    "language": {
+      "type": "string",
+      "default": "ar"
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "chunk_text",
+    "source_name"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

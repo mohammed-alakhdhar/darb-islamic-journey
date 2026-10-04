@@ -6,6 +6,12 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import Landing from '@/pages/Landing';
+import LevelSelect from '@/pages/LevelSelect';
+import JourneyMap from '@/pages/JourneyMap';
+import Stage from '@/pages/Stage';
+import HowItWorks from '@/pages/HowItWorks';
+import Admin from '@/pages/Admin';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -34,7 +40,12 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route path="/" element={<Landing />} />
+      <Route path="/level" element={<LevelSelect />} />
+      <Route path="/journey/:journeySlug" element={<JourneyMap />} />
+      <Route path="/journey/:journeySlug/stage/:order" element={<Stage />} />
+      <Route path="/how-it-works" element={<HowItWorks />} />
+      <Route path="/admin" element={<Admin />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -1,0 +1,60 @@
+{
+  "name": "Journey",
+  "type": "object",
+  "properties": {
+    "slug": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "coming_soon"
+      ],
+      "default": "coming_soon"
+    },
+    "order": {
+      "type": "number",
+      "default": 0
+    },
+    "hero_image": {
+      "type": "string"
+    },
+    "accent": {
+      "type": "string",
+      "default": "green"
+    }
+  },
+  "required": [
+    "slug",
+    "title",
+    "status"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

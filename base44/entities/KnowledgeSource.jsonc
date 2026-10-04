@@ -1,0 +1,71 @@
+{
+  "name": "KnowledgeSource",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "hadith",
+        "historical",
+        "secondary",
+        "insufficient"
+      ],
+      "default": "historical"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "historical",
+        "needs_clarification",
+        "insufficient"
+      ],
+      "default": "needs_clarification"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string",
+      "default": "ar"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
