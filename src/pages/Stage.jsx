@@ -160,12 +160,14 @@ export default function Stage() {
       <div className="mx-auto max-w-4xl px-4 sm:px-6 -mt-8 space-y-6">
         {/* السرد — محتوى معرفي يبقى كما ورد في قاعدة المعرفة */}
         {stage?.narrative && (
-          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-soft">
-            <div className="flex items-center gap-2 mb-3 text-primary">
-              <ScrollText className="h-5 w-5" />
-              <h2 className="font-display text-lg font-bold">{t('stage.historicalContext')}</h2>
+          <div className="mt-8 sm:mt-12 rounded-3xl border border-border bg-card/95 backdrop-blur-sm p-7 sm:p-10 shadow-lift">
+            <div className="flex items-center gap-3 mb-5 pb-4 border-b border-border/70">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
+                <ScrollText className="h-5 w-5" />
+              </span>
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">{t('stage.historicalContext')}</h2>
             </div>
-            <p className="leading-loose text-foreground/90 text-pretty">{stage.narrative}</p>
+            <p className="leading-loose text-foreground/85 text-base sm:text-lg text-pretty">{stage.narrative}</p>
           </div>
         )}
 
