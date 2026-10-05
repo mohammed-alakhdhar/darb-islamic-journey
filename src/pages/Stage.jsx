@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, MapPin, BookOpen, Award, Check, Lock, ChevronLeft, ScrollText } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import AIGuidePanel from '@/components/AIGuidePanel';
 import ChallengeView from '@/components/ChallengeView';
-import SourceCard from '@/components/SourceCard';
 import { base44 } from '@/api/base44Client';
 import { useUserProgress } from '@/lib/darb';
 import { useI18n } from '@/lib/i18n';
@@ -22,9 +21,13 @@ export default function Stage() {
   const [guideOpen, setGuideOpen] = useState(false);
   const [stageDone, setStageDone] = useState(false);
   const [reward, setReward] = useState(null);
+  const [challengeIndex, setChallengeIndex] = useState(0);
+  const [currentSolved, setCurrentSolved] = useState(false);
+  const initedForStage = useRef(null);
 
   useEffect(() => {
     setStage(null); setEvents([]); setChallenges([]); setStageDone(false); setReward(null);
+    setChallengeIndex(0); setCurrentSolved(false);
     Promise.all([
       base44.entities.JourneyStage.filter({ journey_slug: journeySlug, order: stageOrder }, 'order', 1),
       base44.entities.HistoricalEvent.filter({ journey_slug: journeySlug, stage_order: stageOrder }, 'created_date', 20),
@@ -55,35 +58,64 @@ export default function Stage() {
   const completedChallenges = progress?.completed_challenges || [];
   const isLocked = stageOrder !== 1 && !completedStages.includes(stageOrder - 1);
 
+  // تهيئة مؤشر السؤال: ابدأ عند أول سؤال غير محلول، أو اعتبر المحطة مكتملة إن حُلّ جميعها
+  useEffect(() => {
+    if (challenges.length && initedForStage.current !== stageOrder) {
+      initedForStage.current = stageOrder;
+      const firstUnsolved = challenges.findIndex((c) => !completedChallenges.includes(c.id));
+      if (firstUnsolved === -1) {
+        const stageXp = challenges.reduce((s, c) => s + (c.xp_reward || 0), 0);
+        const badgeName = stage?.badge_name || `${t('stage.stageLabel')} ${stageOrder}`;
+        setReward({ xp: stageXp, badge: completedStages.includes(stageOrder) ? badgeName : null });
+        setStageDone(true);
+      } else {
+        setChallengeIndex(firstUnsolved);
+      }
+    }
+  }, [challenges, completedChallenges, stageOrder]);
+
   const handleSolved = async (challenge) => {
-    if (completedChallenges.includes(challenge.id)) {
+    const isLast = challengeIndex >= challenges.length - 1;
+    const already = completedChallenges.includes(challenge.id);
+    const gained = already ? 0 : (challenge.xp_reward || 50);
+    const newChallenges = already ? completedChallenges : [...completedChallenges, challenge.id];
+
+    if (isLast) {
+      // السؤال الأخير → إكمال المحطة
+      let newBadges = progress?.badges || [];
+      let stageJustCompleted = false;
+      let newCompletedStages = [...completedStages];
+      if (!newCompletedStages.includes(stageOrder)) {
+        newCompletedStages.push(stageOrder);
+        stageJustCompleted = true;
+        const badgeName = stage?.badge_name || `${t('stage.stageLabel')} ${stageOrder}`;
+        if (!newBadges.includes(badgeName)) newBadges.push(badgeName);
+      }
+      const stageXp = challenges.reduce((s, c) => s + (c.xp_reward || 0), 0);
+      await update({
+        completed_challenges: newChallenges,
+        xp: (progress?.xp || 0) + gained,
+        completed_stages: newCompletedStages,
+        badges: newBadges,
+        current_stage: stageOrder + 1
+      });
       setStageDone(true);
-      return;
+      setReward({ xp: stageXp, badge: stageJustCompleted ? (stage?.badge_name || `${t('stage.stageLabel')} ${stageOrder}`) : null });
+      reload();
+    } else {
+      // السؤال الأول → تسجيل الإجابة والبقاء على نتيجته حتى ينتقل المستخدم
+      await update({
+        completed_challenges: newChallenges,
+        xp: (progress?.xp || 0) + gained
+      });
+      setCurrentSolved(true);
+      reload();
     }
-    const newChallenges = [...completedChallenges, challenge.id];
-    const gained = challenge.xp_reward || 50;
-    let newBadges = progress?.badges || [];
-    let stageJustCompleted = false;
+  };
 
-    let newCompletedStages = [...completedStages];
-    if (!newCompletedStages.includes(stageOrder)) {
-      newCompletedStages.push(stageOrder);
-      stageJustCompleted = true;
-      const badgeName = stage?.badge_name || `${t('stage.stageLabel')} ${stageOrder}`;
-      if (!newBadges.includes(badgeName)) newBadges.push(badgeName);
-    }
-
-    await update({
-      completed_challenges: newChallenges,
-      xp: (progress?.xp || 0) + gained,
-      completed_stages: newCompletedStages,
-      badges: newBadges,
-      current_stage: stageOrder + 1
-    });
-
-    setStageDone(true);
-    setReward({ xp: gained, badge: stageJustCompleted ? (stage?.badge_name || `${t('stage.stageLabel')} ${stageOrder}`) : null });
-    reload();
+  const goNextChallenge = () => {
+    setCurrentSolved(false);
+    setChallengeIndex((i) => i + 1);
   };
 
   if (isLocked) {
@@ -195,15 +227,33 @@ export default function Stage() {
         {/* التحدي */}
         {challenges.length > 0 && !stageDone && (
           <div>
-            <div className="flex items-center gap-2 px-1 mb-3">
-              <Award className="h-5 w-5 text-darb-gold" />
-              <h2 className="font-display text-lg font-bold text-foreground">{t('stage.challengeTitle')}</h2>
+            <div className="flex items-center justify-between gap-2 px-1 mb-3">
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-darb-gold" />
+                <h2 className="font-display text-lg font-bold text-foreground">{t('stage.challengeTitle')}</h2>
+              </div>
+              {challenges.length > 1 && (
+                <span className="rounded-full bg-darb-gold/15 px-3 py-1 text-xs font-semibold text-darb-gold">
+                  {t('challenge.questionOf', { current: challengeIndex + 1, total: challenges.length })}
+                </span>
+              )}
             </div>
             <ChallengeView
-              challenge={challenges[0]}
-              source={sources[challenges[0]?.source_id]}
+              key={challenges[challengeIndex]?.id || challengeIndex}
+              challenge={challenges[challengeIndex]}
+              source={sources[challenges[challengeIndex]?.source_id]}
               onSolved={handleSolved}
             />
+            {currentSolved && challengeIndex < challenges.length - 1 && (
+              <div className="mt-4 flex justify-center">
+                <button
+                  onClick={goNextChallenge}
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  {t('challenge.nextQuestion')} <ChevronLeft className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
         )}
 
