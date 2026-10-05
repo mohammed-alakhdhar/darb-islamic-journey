@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Compass, Sparkles, ShieldCheck, Map, BookOpen, Brain } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import JourneyCard from '@/components/JourneyCard';
+import { Image } from '@/components/ui/image';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useUserProgress } from '@/lib/darb';
@@ -31,9 +32,16 @@ export default function Landing() {
 
       {/* البطل */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-arabesque opacity-50" />
-        <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-darb-gold/10 blur-3xl" />
-        <div className="absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+        <Image
+          src="https://media.base44.com/images/public/6ac2429ee90f4ed4937908c4/b116618b8_generated_image.png"
+          alt=""
+          fittingType="fill"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/70 to-background/95" />
+        <div className="absolute inset-0 bg-arabesque opacity-15" />
+        <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-darb-gold/15 blur-3xl" />
+        <div className="absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-primary/15 blur-3xl" />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-28 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-darb-gold/40 bg-darb-gold/10 px-4 py-1.5 text-sm font-medium text-darb-navy mb-6">
             <Sparkles className="h-4 w-4 text-darb-gold" />
