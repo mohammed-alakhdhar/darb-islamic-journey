@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, MapPin, BookOpen, Award, Check, Lock, ChevronLeft, ScrollText } from 'lucide-react';
+import { ArrowRight, Sparkles, BookOpen, Award, Check, Lock, ChevronLeft, ScrollText } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import StageHero from '@/components/stage/StageHero';
 import AIGuidePanel from '@/components/AIGuidePanel';
 import ChallengeView from '@/components/ChallengeView';
 import { base44 } from '@/api/base44Client';
@@ -13,7 +14,7 @@ export default function Stage() {
   const stageOrder = Number(order);
   const navigate = useNavigate();
   const { progress, update, reload } = useUserProgress();
-  const { t, stageMeta, verificationLabel, dir } = useI18n();
+  const { t, stageMeta, verificationLabel } = useI18n();
   const [stage, setStage] = useState(null);
   const [events, setEvents] = useState([]);
   const [challenges, setChallenges] = useState([]);
@@ -138,43 +139,23 @@ export default function Stage() {
     );
   }
 
-  const env = stage?.environment || 'صحراء';
-  const envGradient = {
-    'مكة': 'from-darb-navy via-primary to-secondary',
-    'غار': 'from-darb-navy via-darb-navy to-secondary',
-    'صحراء': 'from-amber-700 via-darb-gold to-amber-500',
-    'خيمة': 'from-amber-600 via-darb-gold to-amber-400',
-    'مدينة': 'from-primary via-darb-green-soft to-darb-navy'
-  }[env] || 'from-darb-navy to-primary';
-
   const meta = stageMeta(stageOrder);
   const stageTitle = meta?.title || stage?.title || t('stage.stageLabel');
   const stageSubtitle = meta?.subtitle || stage?.subtitle;
-  const BackIcon = dir === 'rtl' ? ChevronLeft : ChevronLeft;
 
   return (
     <div className="min-h-screen gradient-sand pb-28">
       <Navbar xp={progress?.xp} />
 
-      {/* رأس المحطة البيئي */}
-      <div className="relative overflow-hidden">
-        <div className={`absolute inset-0 bg-gradient-to-b ${envGradient}`} />
-        <div className="absolute inset-0 bg-arabesque opacity-20" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/40" />
-        <div className="relative mx-auto max-w-4xl px-4 sm:px-6 pt-10 pb-16 text-center text-primary-foreground">
-          <Link to={`/journey/${journeySlug}`} className="inline-flex items-center gap-1.5 text-sm text-primary-foreground/80 hover:text-primary-foreground mb-6">
-            <BackIcon className="h-4 w-4" /> {t('stage.mapLink')}
-          </Link>
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium mb-4">
-            {t('stage.stageLabel')} {String(stageOrder).padStart(2, '0')}
-          </div>
-          <h1 className="font-display text-4xl sm:text-5xl font-bold">{stageTitle}</h1>
-          {stageSubtitle && <p className="mt-2 text-primary-foreground/85 font-medium">{stageSubtitle}</p>}
-          <div className="mt-4 inline-flex items-center gap-1.5 text-sm text-primary-foreground/70">
-            <MapPin className="h-4 w-4" /> {stage?.location || ''}
-          </div>
-        </div>
-      </div>
+      {/* رأس المحطة السينمائي — صورة فريدة لكل محطة + انتقال Fade & Zoom */}
+      <StageHero
+        key={stageOrder}
+        journeySlug={journeySlug}
+        stageOrder={stageOrder}
+        stageTitle={stageTitle}
+        stageSubtitle={stageSubtitle}
+        location={stage?.location || ''}
+      />
 
       <div className="mx-auto max-w-4xl px-4 sm:px-6 -mt-8 space-y-6">
         {/* السرد — محتوى معرفي يبقى كما ورد في قاعدة المعرفة */}
