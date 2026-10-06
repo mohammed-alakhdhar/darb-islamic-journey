@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Compass, Sparkles, ShieldCheck, Map, BookOpen, Brain } from 'lucide-react';
+import { ArrowLeft, Compass, Sparkles, ShieldCheck, Map, BookOpen, Brain, Gamepad } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import JourneyCard from '@/components/JourneyCard';
 import { Image } from '@/components/ui/image';
@@ -66,6 +66,15 @@ export default function Landing() {
             <a href="#journeys" className="group inline-flex items-center gap-2 rounded-xl border border-amber-100/25 bg-white/5 px-8 py-4 text-base font-semibold text-amber-50 backdrop-blur-sm hover:bg-white/10 hover:border-amber-100/40 transition-all">
               <Compass className="h-5 w-5 text-darb-gold" />
               {t('landing.exploreJourneys')}
+            </a>
+            <a
+              href="https://d7oom801.itch.io/darb"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 rounded-xl border border-emerald-300/30 bg-emerald-400/10 px-8 py-4 text-base font-semibold text-amber-50 backdrop-blur-sm hover:bg-emerald-400/20 hover:border-emerald-300/50 transition-all"
+            >
+              <Gamepad className="h-5 w-5 text-emerald-300" />
+              🎮 لعبة دَرْب
             </a>
           </div>
 
