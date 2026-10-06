@@ -82,29 +82,38 @@ export default function Landing() {
       </section>
 
       {/* كيف يعمل دَرْب */}
-      <section className="relative py-20 sm:py-28 bg-gradient-to-b from-[#f3ede0] via-[#f6f1e6] to-[#f1eadc] border-y border-darb-gold/20">
-        <div className="absolute inset-0 bg-arabesque opacity-[0.04]" />
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <span className="block h-px w-16 mx-auto mb-4 bg-gradient-to-l from-transparent via-darb-gold to-transparent" />
-            <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground">{t('landing.howTitle')}</h2>
-            <p className="mt-3 text-muted-foreground">{t('landing.howSubtitle')}</p>
+      <section className="relative overflow-hidden">
+        {/* انتقال ناعم من الـHero الداكن إلى الرمل الدافئ */}
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0e2a23] via-[#163027]/70 to-transparent" />
+        {/* خلفية رملية دافئة عميقة */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#e8dcc4] via-[#ece2cf] to-[#e3d7be]" />
+        <div className="absolute inset-0 bg-arabesque opacity-[0.05]" />
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 pt-16 sm:pt-20 pb-20 sm:pb-28">
+          <div className="text-center mb-10 sm:mb-12">
+            <span className="inline-flex items-center gap-2 mb-4">
+              <span className="h-px w-10 bg-gradient-to-l from-transparent to-darb-gold/60" />
+              <Compass className="h-5 w-5 text-darb-gold" />
+              <span className="h-px w-10 bg-gradient-to-r from-transparent to-darb-gold/60" />
+            </span>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0e2a23] tracking-tight">{t('landing.howTitle')}</h2>
+            <p className="mt-3 text-[#3a4a3f]/80">{t('landing.howSubtitle')}</p>
           </div>
-          <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {/* مسار بصري خفيف يربط البطاقات (ديسكتوب) */}
-            <div className="hidden lg:block absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-gradient-to-l from-transparent via-darb-gold/30 to-transparent" />
+          <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* مسار درب الرحلة — خط رفيل يربط شارات الخطوات (ديسكتوب) */}
+            <div className="hidden lg:block absolute top-2 right-0 left-0 h-px bg-gradient-to-l from-transparent via-darb-gold/45 to-transparent" />
             {howSteps.map((s) => (
-              <div key={s.n} className="group relative rounded-3xl border border-border bg-card/90 p-6 shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300">
-                <div className="absolute top-0 right-1/2 translate-x-1/2 h-1 w-12 rounded-full bg-gradient-to-l from-darb-gold/60 to-darb-gold/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="grid h-12 w-12 place-items-center rounded-2xl gradient-darb text-darb-cream font-display text-xl font-bold shadow-soft">{s.n}</div>
-                <h3 className="mt-5 font-display font-bold text-foreground">{s.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              <div key={s.n} className="group relative rounded-3xl border border-darb-gold/15 bg-gradient-to-b from-[#fbf6ec] to-[#f3ead6] p-6 pt-10 shadow-[0_4px_24px_rgba(14,42,35,0.08)] hover:shadow-[0_12px_40px_rgba(14,42,35,0.14)] hover:-translate-y-1 transition-all duration-300">
+                <div className="absolute -top-5 right-1/2 translate-x-1/2 grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#1e4d3a] to-[#0e2a23] text-amber-50 font-display text-xl font-bold shadow-[0_6px_18px_rgba(14,42,35,0.35)] ring-4 ring-[#ece2cf]">{s.n}</div>
+                <h3 className="mt-3 font-display font-bold text-[#0e2a23]">{s.title}</h3>
+                <p className="mt-2 text-sm text-[#3a4a3f]/75 leading-relaxed">{s.desc}</p>
               </div>
             ))}
-            <div className="group relative rounded-3xl border border-darb-gold/40 bg-gradient-to-br from-darb-gold/15 to-darb-gold/5 p-6 shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 flex flex-col justify-center">
-              <Sparkles className="h-9 w-9 text-darb-gold" />
-              <h3 className="mt-4 font-display font-bold text-foreground">{t('landing.endlessTitle')}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{t('landing.endlessDesc')}</p>
+            <div className="group relative rounded-3xl border border-darb-gold/30 bg-gradient-to-br from-[#1e4d3a] to-[#0e2a23] p-6 sm:col-span-2 lg:col-span-4 shadow-[0_6px_24px_rgba(14,42,35,0.2)] hover:shadow-[0_14px_40px_rgba(14,42,35,0.3)] transition-all duration-300 flex flex-col justify-center">
+              <div className="flex items-center gap-3">
+                <Sparkles className="h-8 w-8 text-darb-gold" />
+                <h3 className="font-display font-bold text-amber-50">{t('landing.endlessTitle')}</h3>
+              </div>
+              <p className="mt-3 text-sm text-amber-50/75 leading-relaxed max-w-2xl">{t('landing.endlessDesc')}</p>
             </div>
           </div>
         </div>
