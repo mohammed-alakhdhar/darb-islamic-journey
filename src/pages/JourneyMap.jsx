@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Compass, ArrowLeft, BookOpen, Award } from 'lucide-react';
+import { Sparkles, Compass, ArrowLeft, Award } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import HijrahJourneyMap from '@/components/hijrah/HijrahJourneyMap';
 import BadgesModal from '@/components/hijrah/BadgesModal';
+import AIGuidePanel from '@/components/AIGuidePanel';
 import { useUserProgress, HIJRAH_LANDMARK_STAGES } from '@/lib/darb';
 import { useI18n } from '@/lib/i18n';
 
@@ -12,15 +13,12 @@ export default function JourneyMap({ journeySlug = 'hijrah' }) {
   const { progress, update } = useUserProgress();
   const { t, journeyMeta, stageMeta } = useI18n();
   const [badgesOpen, setBadgesOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const startJourney = () => {
     const stage = progress?.current_stage && progress.current_stage > 1 ? progress.current_stage : 1;
     update({ current_journey: 'hijrah', current_stage: stage });
     navigate(`/journey/hijrah/stage/${stage}`);
-  };
-
-  const exploreStory = () => {
-    document.getElementById('journey-map')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleExplore = (stageOrder) => {
@@ -77,10 +75,10 @@ export default function JourneyMap({ journeySlug = 'hijrah' }) {
               {t('map.startJourney')} <ArrowLeft className="h-5 w-5" />
             </button>
             <button
-              onClick={exploreStory}
-              className="inline-flex items-center gap-2 rounded-xl border border-amber-300/30 bg-white/5 px-7 py-3.5 text-base font-semibold text-amber-100 hover:bg-white/10 transition-colors"
+              onClick={() => setGuideOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-amber-300/30 bg-amber-400/10 px-7 py-3.5 text-base font-semibold text-amber-200 hover:bg-amber-400/20 transition-colors"
             >
-              <BookOpen className="h-5 w-5" /> {t('map.exploreStory')}
+              <Sparkles className="h-5 w-5" /> {t('stage.guideButton')}
             </button>
             <button
               onClick={() => setBadgesOpen(true)}
@@ -135,6 +133,14 @@ export default function JourneyMap({ journeySlug = 'hijrah' }) {
       </footer>
 
       <BadgesModal open={badgesOpen} onClose={() => setBadgesOpen(false)} completedStages={progress?.completed_stages || []} />
+      <AIGuidePanel
+        open={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        journeySlug="hijrah"
+        stageOrder={progress?.current_stage || 1}
+        knowledgeLevel={progress?.knowledge_level || 'beginner'}
+        stageTitle={stageMeta(progress?.current_stage || 1)?.title || ''}
+      />
     </div>
   );
 }
