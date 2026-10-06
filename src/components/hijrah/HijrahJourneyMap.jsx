@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Lock, Check } from 'lucide-react';
 import LandmarkCard from './LandmarkCard';
+import { isStageUnlocked } from '@/lib/darb';
 
 // المعالم الثمانية المرئية على خريطة الهجرة — طبقة بصرية فوق المحطات الموثقة (JourneyStage).
 // لا تُستبدل المحطات ولا تُحذف؛ كل معلم مرتبط بمحطته لاستكشافها.
@@ -54,7 +55,7 @@ export default function HijrahJourneyMap({ progress, stageMeta, t, onExplore }) 
       const x = W - padX - (i * (W - padX * 2)) / (LANDMARKS.length - 1);
       const y = H / 2 + Math.sin(i * 0.95) * amp;
       const done = completed.includes(lm.stage);
-      const unlocked = lm.stage === 1 || completed.includes(lm.stage - 1);
+      const unlocked = isStageUnlocked(lm.stage, completed);
       const isCurrent = !done && unlocked && currentStage === lm.stage;
       const status = done ? 'completed' : isCurrent ? 'current' : unlocked ? 'unlocked' : 'locked';
       return { ...lm, x, y, index: i, status, done, isCurrent, unlocked };

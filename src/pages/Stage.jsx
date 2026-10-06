@@ -6,7 +6,7 @@ import StageHero from '@/components/stage/StageHero';
 import AIGuidePanel from '@/components/AIGuidePanel';
 import ChallengeView from '@/components/ChallengeView';
 import { base44 } from '@/api/base44Client';
-import { useUserProgress } from '@/lib/darb';
+import { useUserProgress, isStageUnlocked } from '@/lib/darb';
 import { useI18n } from '@/lib/i18n';
 
 export default function Stage() {
@@ -57,7 +57,7 @@ export default function Stage() {
 
   const completedStages = progress?.completed_stages || [];
   const completedChallenges = progress?.completed_challenges || [];
-  const isLocked = stageOrder !== 1 && !completedStages.includes(stageOrder - 1);
+  const isLocked = !isStageUnlocked(stageOrder, completedStages);
 
   // تهيئة مؤشر السؤال: ابدأ عند أول سؤال غير محلول، أو اعتبر المحطة مكتملة إن حُلّ جميعها
   useEffect(() => {

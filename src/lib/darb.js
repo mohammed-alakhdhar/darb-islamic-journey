@@ -41,6 +41,19 @@ export const HOW_STEPS = [
   { n: '7', title: 'افتح المرحلة التالية', desc: 'اكسب نقاط الخبرة والشارات، وتابع رحلتك.' }
 ];
 
+// مراحل درب الهجرة التي لها معالم على الخريطة (تُستخدم لمنطق فتح المحطات)
+export const HIJRAH_LANDMARK_STAGES = [1, 2, 3, 5, 6, 7, 9, 10];
+
+// هل المحطة مفتوحة؟ تُفتح المحطة إذا كانت الأولى، أو إذا أُكمل المعلم السابق لها على درب الهجرة.
+// هذا يضمن أن إكمال أي محطة يفتح المعلم التالي مباشرة حتى لو لم تكن كل المراحل لها معالم على الخريطة.
+export function isStageUnlocked(stageOrder, completedStages) {
+  const done = completedStages || [];
+  if (stageOrder === 1) return true;
+  const prevLandmark = HIJRAH_LANDMARK_STAGES.filter((s) => s < stageOrder).pop();
+  if (prevLandmark == null) return done.includes(stageOrder - 1);
+  return done.includes(prevLandmark);
+}
+
 // هوك إدارة تقدم المستخدم (تخزين محلي — يعمل للزوار دون تسجيل دخول)
 const PROGRESS_KEY = 'darb_progress_v1';
 const DEFAULT_PROGRESS = {
