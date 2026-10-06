@@ -1,14 +1,17 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Compass, ArrowLeft, BookOpen, Award } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import HijrahJourneyMap from '@/components/hijrah/HijrahJourneyMap';
-import { useUserProgress } from '@/lib/darb';
+import BadgesModal from '@/components/hijrah/BadgesModal';
+import { useUserProgress, HIJRAH_LANDMARK_STAGES } from '@/lib/darb';
 import { useI18n } from '@/lib/i18n';
 
 export default function JourneyMap({ journeySlug = 'hijrah' }) {
   const navigate = useNavigate();
   const { progress, update } = useUserProgress();
   const { t, journeyMeta, stageMeta } = useI18n();
+  const [badgesOpen, setBadgesOpen] = useState(false);
 
   const startJourney = () => {
     const stage = progress?.current_stage && progress.current_stage > 1 ? progress.current_stage : 1;
@@ -44,8 +47,9 @@ export default function JourneyMap({ journeySlug = 'hijrah' }) {
   }
 
   const completed = progress?.completed_stages || [];
-  const totalStages = 10;
-  const completedCount = completed.length;
+  const totalStages = HIJRAH_LANDMARK_STAGES.length;
+  const completedCount = HIJRAH_LANDMARK_STAGES.filter((s) => completed.includes(s)).length;
+  const earnedBadges = completedCount;
   const pct = Math.round((completedCount / totalStages) * 100);
 
   return (
@@ -78,6 +82,12 @@ export default function JourneyMap({ journeySlug = 'hijrah' }) {
             >
               <BookOpen className="h-5 w-5" /> {t('map.exploreStory')}
             </button>
+            <button
+              onClick={() => setBadgesOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-amber-300/30 bg-amber-400/10 px-7 py-3.5 text-base font-semibold text-amber-200 hover:bg-amber-400/20 transition-colors"
+            >
+              <Award className="h-5 w-5" /> {t('map.badgesButton')}
+            </button>
           </div>
         </div>
       </section>
@@ -97,7 +107,7 @@ export default function JourneyMap({ journeySlug = 'hijrah' }) {
             </div>
             <div className="flex items-center gap-1.5">
               <Award className="h-4 w-4 text-amber-300" />
-              <span className="text-sm font-semibold text-amber-50">{progress?.badges?.length || 0}</span>
+              <span className="text-sm font-semibold text-amber-50">{earnedBadges}</span>
               <span className="text-xs text-amber-100/60">{t('xpbar.badges')}</span>
             </div>
           </div>
@@ -123,6 +133,8 @@ export default function JourneyMap({ journeySlug = 'hijrah' }) {
         <p className="font-display text-base font-bold text-amber-100/70">دَرْب</p>
         <p className="mt-1 px-4">{t('landing.footerNote')}</p>
       </footer>
+
+      <BadgesModal open={badgesOpen} onClose={() => setBadgesOpen(false)} completedStages={progress?.completed_stages || []} />
     </div>
   );
 }

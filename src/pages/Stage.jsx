@@ -6,7 +6,8 @@ import StageHero from '@/components/stage/StageHero';
 import AIGuidePanel from '@/components/AIGuidePanel';
 import ChallengeView from '@/components/ChallengeView';
 import { base44 } from '@/api/base44Client';
-import { useUserProgress, isStageUnlocked } from '@/lib/darb';
+import { useUserProgress, isStageUnlocked, HIJRAH_LANDMARK_STAGES, getNextLandmarkStage } from '@/lib/darb';
+import BadgeIcon from '@/components/hijrah/BadgeIcon';
 import { useI18n } from '@/lib/i18n';
 
 export default function Stage() {
@@ -20,6 +21,7 @@ export default function Stage() {
   const [challenges, setChallenges] = useState([]);
   const [sources, setSources] = useState({});
   const [guideOpen, setGuideOpen] = useState(false);
+  const [badgeRecord, setBadgeRecord] = useState(null);
   const [stageDone, setStageDone] = useState(false);
   const [reward, setReward] = useState(null);
   const [challengeIndex, setChallengeIndex] = useState(0);
@@ -28,15 +30,17 @@ export default function Stage() {
 
   useEffect(() => {
     setStage(null); setEvents([]); setChallenges([]); setStageDone(false); setReward(null);
-    setChallengeIndex(0); setCurrentSolved(false);
+    setChallengeIndex(0); setCurrentSolved(false); setBadgeRecord(null);
     Promise.all([
       base44.entities.JourneyStage.filter({ journey_slug: journeySlug, order: stageOrder }, 'order', 1),
       base44.entities.HistoricalEvent.filter({ journey_slug: journeySlug, stage_order: stageOrder }, 'created_date', 20),
-      base44.entities.Challenge.filter({ journey_slug: journeySlug, stage_order: stageOrder }, 'created_date', 20)
-    ]).then(([s, e, c]) => {
+      base44.entities.Challenge.filter({ journey_slug: journeySlug, stage_order: stageOrder }, 'created_date', 20),
+      base44.entities.Badge.filter({ journey_slug: journeySlug, stage_order: stageOrder }, 'created_date', 1)
+    ]).then(([s, e, c, b]) => {
       if (s.length) setStage(s[0]);
       setEvents(e);
       setChallenges(c);
+      setBadgeRecord(b[0] || null);
     }).catch(() => {});
   }, [journeySlug, stageOrder]);
 
@@ -58,6 +62,11 @@ export default function Stage() {
   const completedStages = progress?.completed_stages || [];
   const completedChallenges = progress?.completed_challenges || [];
   const isLocked = !isStageUnlocked(stageOrder, completedStages);
+  const isLandmarkStage = HIJRAH_LANDMARK_STAGES.includes(stageOrder);
+  const nextStage = getNextLandmarkStage(stageOrder);
+  const stageBadge = stageDone && isLandmarkStage && completedStages.includes(stageOrder)
+    ? (badgeRecord || (stage?.badge_name ? { name: stage.badge_name, description: '', icon: 'award' } : null))
+    : null;
 
   // تهيئة مؤشر السؤال: ابدأ عند أول سؤال غير محلول، أو اعتبر المحطة مكتملة إن حُلّ جميعها
   useEffect(() => {
@@ -66,8 +75,7 @@ export default function Stage() {
       const firstUnsolved = challenges.findIndex((c) => !completedChallenges.includes(c.id));
       if (firstUnsolved === -1) {
         const stageXp = challenges.reduce((s, c) => s + (c.xp_reward || 0), 0);
-        const badgeName = stage?.badge_name || `${t('stage.stageLabel')} ${stageOrder}`;
-        setReward({ xp: stageXp, badge: completedStages.includes(stageOrder) ? badgeName : null });
+        setReward({ xp: stageXp });
         setStageDone(true);
       } else {
         setChallengeIndex(firstUnsolved);
@@ -83,25 +91,29 @@ export default function Stage() {
 
     if (isLast) {
       // السؤال الأخير → إكمال المحطة
+      const isLandmark = HIJRAH_LANDMARK_STAGES.includes(stageOrder);
+      const badgeData = isLandmark
+        ? (badgeRecord || (stage?.badge_name ? { name: stage.badge_name, description: '', icon: 'award' } : null))
+        : null;
       let newBadges = progress?.badges || [];
       let stageJustCompleted = false;
       let newCompletedStages = [...completedStages];
       if (!newCompletedStages.includes(stageOrder)) {
         newCompletedStages.push(stageOrder);
         stageJustCompleted = true;
-        const badgeName = stage?.badge_name || `${t('stage.stageLabel')} ${stageOrder}`;
-        if (!newBadges.includes(badgeName)) newBadges.push(badgeName);
+        if (badgeData && !newBadges.includes(badgeData.name)) newBadges.push(badgeData.name);
       }
       const stageXp = challenges.reduce((s, c) => s + (c.xp_reward || 0), 0);
+      const nextStage = getNextLandmarkStage(stageOrder);
       await update({
         completed_challenges: newChallenges,
         xp: (progress?.xp || 0) + gained,
         completed_stages: newCompletedStages,
         badges: newBadges,
-        current_stage: stageOrder + 1
+        current_stage: nextStage || stageOrder
       });
       setStageDone(true);
-      setReward({ xp: stageXp, badge: stageJustCompleted ? (stage?.badge_name || `${t('stage.stageLabel')} ${stageOrder}`) : null });
+      setReward({ xp: stageXp });
       reload();
     } else {
       // السؤال الأول → تسجيل الإجابة والبقاء على نتيجته حتى ينتقل المستخدم
@@ -240,7 +252,7 @@ export default function Stage() {
           </div>
         )}
 
-        {/* المكافأة */}
+        {/* المكافأة + شارة المحطة */}
         {stageDone && reward && (
           <div className="rounded-3xl border-2 border-darb-gold bg-gradient-to-br from-darb-gold/10 to-card p-6 sm:p-8 text-center shadow-lift">
             <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-darb-gold/20 text-darb-gold mb-3">
@@ -248,18 +260,29 @@ export default function Stage() {
             </div>
             <h3 className="font-display text-2xl font-bold text-foreground">{t('stage.wellDone')}</h3>
             <p className="mt-2 text-muted-foreground">{t('stage.xpEarned', { xp: reward.xp })}</p>
-            {reward.badge && (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-4 py-2 text-sm font-medium">
-                <Sparkles className="h-4 w-4" /> {t('stage.newBadge', { badge: reward.badge })}
+
+            {stageBadge && (
+              <div className="mt-6 rounded-2xl border border-darb-gold/40 bg-gradient-to-br from-darb-gold/15 to-card p-5 animate-hero-rise">
+                <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-slate-900 shadow-[0_0_28px_rgba(240,207,122,0.6)] animate-pulse-slow">
+                  <BadgeIcon name={stageBadge.icon} className="h-10 w-10" />
+                </div>
+                <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-darb-gold/20 px-3 py-1 text-xs font-semibold text-darb-gold">
+                  <Sparkles className="h-3.5 w-3.5" /> {t('stage.newBadgeTitle')}
+                </div>
+                <h4 className="mt-2 font-display text-xl font-bold text-foreground">{stageBadge.name}</h4>
+                {stageBadge.description && <p className="mt-1 text-sm text-muted-foreground">{stageBadge.description}</p>}
               </div>
             )}
+
             <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={() => navigate(`/journey/${journeySlug}/stage/${stageOrder + 1}`)}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-              >
-                {t('stage.nextStage')} <ChevronLeft className="h-4 w-4" />
-              </button>
+              {nextStage && (
+                <button
+                  onClick={() => navigate(`/journey/${journeySlug}/stage/${nextStage}`)}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  {t('stage.continueJourney')} <ChevronLeft className="h-4 w-4" />
+                </button>
+              )}
               <Link to={`/journey/${journeySlug}`} className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground hover:bg-muted">
                 {t('stage.viewMap')}
               </Link>

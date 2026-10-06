@@ -54,6 +54,13 @@ export function isStageUnlocked(stageOrder, completedStages) {
   return done.includes(prevLandmark);
 }
 
+// المحطة (المعلم) التالية بعد محطة معينة على درب الهجرة، أو null إذا كانت الأخيرة.
+export function getNextLandmarkStage(currentStage) {
+  const idx = HIJRAH_LANDMARK_STAGES.indexOf(currentStage);
+  if (idx === -1) return HIJRAH_LANDMARK_STAGES.find((s) => s > currentStage) || null;
+  return HIJRAH_LANDMARK_STAGES[idx + 1] || null;
+}
+
 // هوك إدارة تقدم المستخدم (تخزين محلي — يعمل للزوار دون تسجيل دخول)
 const PROGRESS_KEY = 'darb_progress_v1';
 const DEFAULT_PROGRESS = {
