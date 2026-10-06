@@ -164,7 +164,8 @@ export default function AIGuidePanel({ open, onClose, journeySlug, stageOrder, k
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') ask(); }}
               placeholder={t('guide.inputPlaceholder')}
-              className="flex-1 rounded-xl border border-input bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              dir="auto"
+              className="flex-1 rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground caret-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
             <button
               onClick={() => ask()}
